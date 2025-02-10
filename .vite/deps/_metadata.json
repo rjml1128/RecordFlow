@@ -1,0 +1,76 @@
+{
+  "hash": "0ac0ec39",
+  "configHash": "a55c45d9",
+  "lockfileHash": "25264b37",
+  "browserHash": "5b1f0e15",
+  "optimized": {
+    "vue": {
+      "src": "../../node_modules/vue/dist/vue.runtime.esm-bundler.js",
+      "file": "vue.js",
+      "fileHash": "6da12571",
+      "needsInterop": false
+    },
+    "pinia": {
+      "src": "../../node_modules/pinia/dist/pinia.mjs",
+      "file": "pinia.js",
+      "fileHash": "885dbad0",
+      "needsInterop": false
+    },
+    "dexie": {
+      "src": "../../node_modules/dexie/import-wrapper.mjs",
+      "file": "dexie.js",
+      "fileHash": "b1bda0a1",
+      "needsInterop": false
+    },
+    "firebase/app": {
+      "src": "../../node_modules/firebase/app/dist/esm/index.esm.js",
+      "file": "firebase_app.js",
+      "fileHash": "05188dfd",
+      "needsInterop": false
+    },
+    "firebase/auth": {
+      "src": "../../node_modules/firebase/auth/dist/esm/index.esm.js",
+      "file": "firebase_auth.js",
+      "fileHash": "f78ad292",
+      "needsInterop": false
+    },
+    "firebase/firestore": {
+      "src": "../../node_modules/firebase/firestore/dist/esm/index.esm.js",
+      "file": "firebase_firestore.js",
+      "fileHash": "ee6d687d",
+      "needsInterop": false
+    },
+    "firebase/storage": {
+      "src": "../../node_modules/firebase/storage/dist/esm/index.esm.js",
+      "file": "firebase_storage.js",
+      "fileHash": "6797d1c7",
+      "needsInterop": false
+    },
+    "firebase/database": {
+      "src": "../../node_modules/firebase/database/dist/esm/index.esm.js",
+      "file": "firebase_database.js",
+      "fileHash": "36dfef17",
+      "needsInterop": false
+    },
+    "vue-router": {
+      "src": "../../node_modules/vue-router/dist/vue-router.mjs",
+      "file": "vue-router.js",
+      "fileHash": "ae5fedc2",
+      "needsInterop": false
+    }
+  },
+  "chunks": {
+    "chunk-AYVSL3LM": {
+      "file": "chunk-AYVSL3LM.js"
+    },
+    "chunk-IJV5NOMV": {
+      "file": "chunk-IJV5NOMV.js"
+    },
+    "chunk-ALT5KLOI": {
+      "file": "chunk-ALT5KLOI.js"
+    },
+    "chunk-5WRI5ZAA": {
+      "file": "chunk-5WRI5ZAA.js"
+    }
+  }
+}

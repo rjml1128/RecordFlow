@@ -1,0 +1,102 @@
+# Project Intelligence Rules
+
+## Project Patterns
+1. File Structure
+   - Components in `src/components/`
+   - UI components from ShadCN Vue in `src/components/ui/`
+   - Icons from Radix Icons Vue in `src/components/icons/`
+   - Pages/views in `src/views/`
+   - PWA assets in `public/`
+   - Service worker in project root
+
+2. Naming Conventions
+   - Vue components: PascalCase (e.g., Button.vue)
+   - Utility files: camelCase (e.g., utils.js)
+   - Asset files: kebab-case (e.g., main-logo.svg)
+
+3. Component Patterns
+   - UI components export via index.js files
+   - Icon components follow standard Vue template
+   - Button component as reference for UI primitives
+
+## Implementation Guidelines
+1. PWA Development
+   - Service Worker registration in main entry
+   - Offline-first approach for data operations
+   - Background sync implementation for offline changes
+   - Cache strategies per route/resource type
+
+2. Firebase Integration
+   - Authentication in dedicated composables
+   - Firestore operations through service layer
+   - Storage upload with progress tracking
+   - Security rules in separate config
+
+3. Styling
+   - TailwindCSS utility classes as primary method
+   - ShadCN Vue component styling patterns
+   - Offline/sync state indicators
+   - Global styles in main.css
+
+4. Vue Usage
+   - Composition API for component logic
+   - Props down, events up pattern
+   - Composables for shared logic
+   - Offline-aware components
+
+5. Development Workflow
+   - Vite dev server for local development
+   - PWA testing in production builds
+   - Firebase emulator for local testing
+   - Progressive enhancement strategy
+
+## Project Intelligence
+1. Initial Setup
+   - Teacher-focused PWA with Vue 3 and Vite
+   - Educational data hierarchy implementation
+   - ShadCN Vue for UI components
+   - Firebase for teacher data
+   - IndexedDB for offline classroom use
+   - Memory Bank for documentation
+
+2. Key Directories
+   - src/ - Source code
+   - public/ - PWA assets & static files
+   - memory-bank/ - Project documentation
+
+3. Tools and Configuration
+   - Vite for building and development
+   - PostCSS for CSS processing
+   - ESLint expected for code quality
+
+## Learning Notes
+1. Project Focus
+   - Teacher record management system
+   - Educational data hierarchy:
+     * Grade Levels (top)
+     * Subjects (within grades)
+     * Classes (within subjects)
+     * Class Records (within classes)
+   - Classroom-first offline capabilities
+   - Simple teacher-focused workflow
+
+2. Architecture Decisions
+   - Nested data modeling patterns
+   - Educational hierarchy navigation
+   - Classroom-optimized Service Workers
+   - Teacher-specific data isolation
+   - Simple sync patterns without RBAC
+
+3. Development Approach
+   - Teacher-centric interface design
+   - Classroom usage patterns
+   - Quick data entry workflows
+   - Hierarchical data navigation
+   - Documentation-driven development
+
+4. Testing Considerations
+   - Educational data flow testing
+   - Classroom offline scenarios
+   - Teacher workflow validation
+   - Cross-device classroom testing
+   - Nested data integrity checks
