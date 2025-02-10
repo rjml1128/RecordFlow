@@ -26,7 +26,7 @@ A modern record-keeping application for educators with offline-first capabilitie
 
 1. Clone the repository
 ```bash
-git clone https://github.com/yourusername/recordflow.git
+git clone https://github.com/rjml1128/recordflow.git
 cd recordflow
 ```
 
