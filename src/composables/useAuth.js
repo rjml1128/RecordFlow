@@ -167,8 +167,30 @@ export function useAuth() {
     error.value = ''
 
     try {
+      // First clear all local data and listeners
+      await authStore.clearUser()
+      
+      // Then sign out from Firebase
       await signOut(auth)
-      authStore.clearUser()
+      
+      // Reset all state
+      resetRateLimit()
+      loginAttempts.value = 0
+      lastAttemptTime.value = null
+      rateLimitExpiry.value = null
+      
+      // Clear any cached data
+      if (typeof window !== 'undefined') {
+        const dataService = window.$dataService
+        if (dataService) {
+          dataService.cleanup()
+        }
+        
+        const db = window.$db
+        if (db && db.records) {
+          await db.records.clear()
+        }
+      }
     } catch (e) {
       error.value = handleAuthError(e)
       throw e

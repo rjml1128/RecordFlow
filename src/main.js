@@ -1,15 +1,20 @@
-import './assets/main.css'
-
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import { db, dbOperations } from './lib/db'
 import { auth } from './lib/firebase'
 import { dataService } from './lib/dataService'
+import { useAuthStore } from './stores/auth'
+
+import './assets/main.css'
 
 import App from './App.vue'
 import router from './router/router'
 
 const app = createApp(App)
+const pinia = createPinia()
+
+app.use(pinia)
+app.use(router)
 
 // Make services available globally
 app.config.globalProperties.$db = db
@@ -17,27 +22,50 @@ app.config.globalProperties.$dbOps = dbOperations
 app.config.globalProperties.$dataService = dataService
 app.config.globalProperties.$auth = auth
 
-// Navigation guard
-router.beforeEach((to, from, next) => {
-  const requiresAuth = to.matched.some(record => record.meta.requiresAuth)
-  const isAuthenticated = auth.currentUser
-
-  if (requiresAuth && !isAuthenticated) {
-    next('/auth')
-  } else {
-    next()
-  }
+// First clear any existing state
+Promise.all([
+  // Clear auth state
+  auth.signOut(),
+  // Clear local database
+  db.records?.clear(),
+  // Clean up data service
+  dataService.cleanup()
+])
+.then(() => {
+  // Then initialize app only after auth and database are ready
+  return Promise.all([
+    // Initialize local database
+    db.open().then(() => {
+      console.log('Local database initialized successfully')
+    }),
+    
+    // Wait for auth to initialize
+    new Promise(resolve => {
+      const unsubscribe = auth.onAuthStateChanged(() => {
+        unsubscribe()
+        resolve()
+      })
+    })
+  ])
 })
+.then(() => {
+  // Setup navigation guards
+  router.beforeEach((to, from, next) => {
+    const authStore = useAuthStore()
+    const requiresAuth = to.matched.some(record => record.meta.requiresAuth)
 
-app.use(createPinia())
-app.use(router)
+    if (requiresAuth && !authStore.isAuthenticated) {
+      next('/auth')
+    } else if (to.path.startsWith('/auth') && authStore.isAuthenticated) {
+      next('/dashboard')
+    } else {
+      next()
+    }
+  })
 
-// Initialize database
-db.open().then(() => {
-  console.log('Local database initialized successfully')
-}).catch(err => {
-  console.error('Failed to initialize local database:', err)
+  // Mount the app
+  app.mount('#app')
 })
-
-// Mount the app
-app.mount('#app')
+.catch(err => {
+  console.error('Failed to initialize:', err)
+})

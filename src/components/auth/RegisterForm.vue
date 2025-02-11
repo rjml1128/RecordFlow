@@ -93,7 +93,13 @@
       <div v-if="passwordError" class="text-red-500 text-sm mb-4">{{ passwordError }}</div>
       
       <div class="flex items-center space-x-2">
-        <Checkbox id="terms" v-model="acceptTerms" required :disabled="loading" />
+        <Checkbox
+          id="terms"
+          :checked="acceptTerms"
+          @update:checked="(value) => acceptTerms = value"
+          required
+          :disabled="loading"
+        />
         <Label for="terms" class="font-normal">
           <p class="text-xs text-muted-foreground mt-2">
             By checking this box, you agree to our

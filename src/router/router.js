@@ -1,10 +1,15 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
 import AuthView from '@/views/auth/AuthView.vue'
+import DashboardView from '@/views/dashboard/DashboardView.vue'
 
 const routes = [
   {
     path: '/',
-    redirect: '/auth'
+    redirect: to => {
+      const authStore = useAuthStore()
+      return authStore.isAuthenticated ? '/dashboard' : '/auth'
+    }
   },
   {
     path: '/auth',
@@ -23,11 +28,33 @@ const routes = [
       }
     ]
   },
+  {
+    path: '/dashboard',
+    name: 'dashboard',
+    component: DashboardView,
+    meta: { requiresAuth: true }
+  }
 ]
 
 const router = createRouter({
   history: createWebHistory(),
   routes
+})
+
+// Navigation guard
+router.beforeEach((to, from, next) => {
+  const authStore = useAuthStore()
+  const isAuthRoute = to.path.startsWith('/auth')
+  
+  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
+    // Redirect to login if trying to access protected route while not authenticated
+    next('/auth')
+  } else if (isAuthRoute && authStore.isAuthenticated) {
+    // Redirect to dashboard if trying to access any auth route while authenticated
+    next('/dashboard')
+  } else {
+    next()
+  }
 })
 
 export default router

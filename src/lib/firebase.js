@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import { getAuth, browserLocalPersistence, setPersistence } from 'firebase/auth';
+import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 import { getDatabase } from 'firebase/database';
 
@@ -24,7 +24,10 @@ export const rtdb = getDatabase(app);
 export const storage = getStorage(app);
 
 // Configure auth persistence
-auth.setPersistence('LOCAL');
+setPersistence(auth, browserLocalPersistence)
+  .catch((error) => {
+    console.error('Error setting auth persistence:', error);
+  });
 
 // Helper function to handle auth errors
 export const handleAuthError = (error) => {
@@ -41,6 +44,8 @@ export const handleAuthError = (error) => {
       return 'No account found with this email.';
     case 'auth/wrong-password':
       return 'Incorrect password.';
+    case 'auth/invalid-credential':
+      return 'Please use Google login for this account.';
     default:
       return error.message;
   }
@@ -50,14 +55,22 @@ export const handleAuthError = (error) => {
 export const mergeGoogleProfile = async (user, googleData) => {
   if (!user || !googleData) return;
 
-  const updates = {
-    displayName: user.displayName || googleData.displayName,
-    photoURL: user.photoURL || googleData.photoURL,
-    email: user.email || googleData.email
-  };
-
   try {
-    await user.updateProfile(updates);
+    // Get the current user profile
+    const userDocRef = doc(db, 'users', user.uid);
+    const userProfile = await getDoc(userDocRef);
+
+    // Merge the profile data
+    const updates = {
+      displayName: user.displayName || googleData.displayName,
+      photoURL: user.photoURL || googleData.photoURL,
+      email: user.email || googleData.email,
+      lastSignInTime: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
+    // Update the user document
+    await setDoc(userDocRef, updates, { merge: true });
     return updates;
   } catch (error) {
     console.error('Error updating profile:', error);
