@@ -41,7 +41,7 @@
         <Separator orientation="vertical" class="h-6" />
         <DropdownMenu>
           <DropdownMenuTrigger :as-child="true">
-            <Button variant="ghost" class="flex items-center gap-2 px-2">
+            <Button variant="ghost" class="flex items-center gap-1 px-2">
               <Avatar class="h-8 w-8">
                 <AvatarImage
                   v-if="authStore.user?.photoURL"
@@ -52,7 +52,6 @@
                   {{ authStore.userInitials }}
                 </AvatarFallback>
               </Avatar>
-              <span class="text-sm">{{ authStore.userFullName || authStore.user?.email }}</span>
               <ChevronDown class="h-4 w-4 text-muted-foreground" />
             </Button>
           </DropdownMenuTrigger>
