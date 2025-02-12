@@ -52,15 +52,26 @@
                 <div class="p-6 pt-0 flex items-center justify-between">
                   <div class="flex items-center gap-3">
                     <Avatar>
-                      <AvatarImage src="/placeholder-avatar.jpg" alt="User" />
-                      <AvatarFallback>U</AvatarFallback>
+                      <AvatarImage
+                        v-if="authStore.user?.photoURL"
+                        :src="authStore.user.photoURL"
+                        :alt="authStore.userFullName"
+                      />
+                      <AvatarFallback>
+                        {{ authStore.userInitials }}
+                      </AvatarFallback>
                     </Avatar>
                     <div class="flex flex-col">
-                      <span class="text-sm font-medium">John Doe</span>
-                      <span class="text-xs text-muted-foreground">john.doe@example.com</span>
+                      <span class="text-sm font-medium">{{ authStore.userFullName }}</span>
+                      <span class="text-xs text-muted-foreground">{{ authStore.user?.email }}</span>
                     </div>
-                  </div>
-                  <Button variant="ghost" size="icon" @click="isOpen = false">
+                 </div>
+                 <Button
+                   variant="ghost"
+                   size="icon"
+                   @click="handleLogout"
+                   :disabled="loading"
+                 >
                     <LogOut class="h-5 w-5" />
                     <span class="sr-only">Log out</span>
                   </Button>
@@ -82,7 +93,23 @@ import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Separator } from '@/components/ui/separator'
+import { useAuthStore } from '@/stores/auth'
+import { useAuth } from '@/composables/useAuth'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
+const authStore = useAuthStore()
 const { toggleTheme, isDark } = useTheme()
+const { loading, logout } = useAuth()
 const isOpen = ref(false)
+
+const handleLogout = async () => {
+  try {
+    isOpen.value = false
+    await logout()
+    router.push('/auth')
+  } catch (error) {
+    console.error('Logout failed:', error)
+  }
+}
 </script>

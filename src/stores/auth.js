@@ -39,11 +39,16 @@ export const useAuthStore = defineStore('auth', () => {
     userProfile.value = profile
   }
 
-  async function clearUser() {
+  function clearUserState() {
     user.value = null
     userProfile.value = null
+  }
+
+  async function clearUser() {
+    // First clear user state
+    clearUserState()
     
-    // Clean up services
+    // Then clean up services - only during explicit logout
     if (typeof window !== 'undefined') {
       const dataService = window.$dataService
       if (dataService) {
@@ -80,7 +85,8 @@ export const useAuthStore = defineStore('auth', () => {
             console.error('Error fetching user profile:', error)
           }
         } else {
-          await clearUser()
+          // Only clear user state during auto state change
+          clearUserState()
         }
       } catch (error) {
         console.error('Auth state change error:', error)

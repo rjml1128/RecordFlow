@@ -42,20 +42,35 @@
         <DropdownMenu>
           <DropdownMenuTrigger :as-child="true">
             <Button variant="ghost" class="flex items-center gap-2 px-2">
-              <div class="h-8 w-8 rounded-full bg-muted" />
-              <span class="text-sm">myflowacct2</span>
+              <Avatar class="h-8 w-8">
+                <AvatarImage
+                  v-if="authStore.user?.photoURL"
+                  :src="authStore.user.photoURL"
+                  :alt="authStore.userFullName"
+                />
+                <AvatarFallback>
+                  {{ authStore.userInitials }}
+                </AvatarFallback>
+              </Avatar>
+              <span class="text-sm">{{ authStore.userFullName || authStore.user?.email }}</span>
               <ChevronDown class="h-4 w-4 text-muted-foreground" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" class="w-56">
-            <DropdownMenuItem class="flex items-center gap-2 cursor-pointer dropdown-menu-item">
-              <User class="h-4 w-4" />
-              <span>Manage Profile</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem class="flex items-center gap-2 cursor-pointer dropdown-menu-item">
-              <LogOut class="h-4 w-4" />
-              <span>Log out</span>
-            </DropdownMenuItem>
+            <div class="p-2 border-b border-border">
+              <p class="text-sm font-medium">{{ authStore.userFullName }}</p>
+              <p class="text-xs text-muted-foreground truncate">{{ authStore.user?.email }}</p>
+            </div>
+            <div class="p-1">
+              <DropdownMenuItem
+                class="flex items-center gap-2 cursor-pointer dropdown-menu-item"
+                @click="handleLogout"
+                :disabled="loading"
+              >
+                <LogOut class="h-4 w-4" />
+                <span>{{ loading ? 'Logging out...' : 'Log out' }}</span>
+              </DropdownMenuItem>
+            </div>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
@@ -69,6 +84,22 @@ import { Settings, Layers, LayoutDashboard, Moon, Sun, ChevronDown, User, LogOut
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Separator } from '@/components/ui/separator'
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
+import { useAuthStore } from '@/stores/auth'
+import { useAuth } from '@/composables/useAuth'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
+const authStore = useAuthStore()
 const { toggleTheme, isDark } = useTheme()
+const { loading, logout } = useAuth()
+
+const handleLogout = async () => {
+  try {
+    await logout()
+    router.push('/auth')
+  } catch (error) {
+    console.error('Logout failed:', error)
+  }
+}
 </script>
