@@ -65,18 +65,25 @@ export const useAuthStore = defineStore('auth', () => {
     const { getUserProfile } = useFirestore()
     
     unsubscribe = auth.onAuthStateChanged(async (userData) => {
-      initialized.value = true
-      
-      if (userData) {
-        setUser(userData)
-        try {
-          const profile = await getUserProfile(userData.uid)
-          setUserProfile(profile)
-        } catch (error) {
-          console.error('Error fetching user profile:', error)
+      try {
+        initialized.value = true
+        
+        // Wait for Firebase auth state to fully initialize
+        await auth.authStateReady()
+        
+        if (userData) {
+          setUser(userData)
+          try {
+            const profile = await getUserProfile(userData.uid)
+            setUserProfile(profile)
+          } catch (error) {
+            console.error('Error fetching user profile:', error)
+          }
+        } else {
+          await clearUser()
         }
-      } else {
-        clearUser()
+      } catch (error) {
+        console.error('Auth state change error:', error)
       }
     })
   }
