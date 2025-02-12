@@ -6,9 +6,8 @@ import {
   GoogleAuthProvider,
   signOut,
   sendPasswordResetEmail,
-  onAuthStateChanged
 } from 'firebase/auth'
-import { doc, setDoc, getDoc } from 'firebase/firestore'
+import { doc, setDoc } from 'firebase/firestore'
 import { auth, db, handleAuthError, mergeGoogleProfile } from '@/lib/firebase'
 import { useAuthStore } from '@/stores/auth'
 import { useFirestore } from './useFirestore'
@@ -93,7 +92,6 @@ export function useAuth() {
         email
       })
 
-      authStore.setUser(userCredential.user)
       return userCredential.user
     } catch (e) {
       error.value = handleAuthError(e)
@@ -115,12 +113,6 @@ export function useAuth() {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password)
       resetRateLimit()
-      
-      // Get and store user profile
-      const profile = await getUserProfile(userCredential.user.uid)
-      authStore.setUser(userCredential.user)
-      authStore.setUserProfile(profile)
-      
       return userCredential.user
     } catch (e) {
       error.value = handleAuthError(e)
@@ -167,8 +159,16 @@ export function useAuth() {
     error.value = ''
 
     try {
-      // First clear all local data and listeners
-      await authStore.clearUser()
+      // First clear services and database
+      if (typeof window !== 'undefined') {
+        if (window.$dataService) {
+          window.$dataService.cleanup()
+        }
+        
+        if (window.$db?.records) {
+          await window.$db.records.clear()
+        }
+      }
       
       // Then sign out from Firebase
       await signOut(auth)
@@ -178,19 +178,6 @@ export function useAuth() {
       loginAttempts.value = 0
       lastAttemptTime.value = null
       rateLimitExpiry.value = null
-      
-      // Clear any cached data
-      if (typeof window !== 'undefined') {
-        const dataService = window.$dataService
-        if (dataService) {
-          dataService.cleanup()
-        }
-        
-        const db = window.$db
-        if (db && db.records) {
-          await db.records.clear()
-        }
-      }
     } catch (e) {
       error.value = handleAuthError(e)
       throw e
@@ -212,22 +199,6 @@ export function useAuth() {
       loading.value = false
     }
   }
-
-  // Initialize auth state listener
-  onAuthStateChanged(auth, async (user) => {
-    if (user) {
-      // Get and store user profile whenever auth state changes
-      try {
-        const profile = await getUserProfile(user.uid)
-        authStore.setUser(user)
-        authStore.setUserProfile(profile)
-      } catch (e) {
-        console.error('Error fetching user profile:', e)
-      }
-    } else {
-      authStore.clearUser()
-    }
-  })
 
   return {
     loading,

@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed } from 'vue'
 import { auth } from '@/lib/firebase'
 import { useFirestore } from '@/composables/useFirestore'
 
@@ -39,27 +39,9 @@ export const useAuthStore = defineStore('auth', () => {
     userProfile.value = profile
   }
 
-  function clearUserState() {
+  function clearState() {
     user.value = null
     userProfile.value = null
-  }
-
-  async function clearUser() {
-    // First clear user state
-    clearUserState()
-    
-    // Then clean up services - only during explicit logout
-    if (typeof window !== 'undefined') {
-      const dataService = window.$dataService
-      if (dataService) {
-        dataService.cleanup()
-      }
-      
-      const db = window.$db
-      if (db && db.records) {
-        await db.records.clear()
-      }
-    }
   }
 
   // Initialize auth state listener
@@ -73,9 +55,6 @@ export const useAuthStore = defineStore('auth', () => {
       try {
         initialized.value = true
         
-        // Wait for Firebase auth state to fully initialize
-        await auth.authStateReady()
-        
         if (userData) {
           setUser(userData)
           try {
@@ -85,8 +64,7 @@ export const useAuthStore = defineStore('auth', () => {
             console.error('Error fetching user profile:', error)
           }
         } else {
-          // Only clear user state during auto state change
-          clearUserState()
+          clearState()
         }
       } catch (error) {
         console.error('Auth state change error:', error)
@@ -119,7 +97,7 @@ export const useAuthStore = defineStore('auth', () => {
     // Actions
     setUser,
     setUserProfile,
-    clearUser,
+    clearState,
     initialize,
     cleanup,
   }

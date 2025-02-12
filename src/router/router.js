@@ -42,9 +42,26 @@ const router = createRouter({
 })
 
 // Navigation guard
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore()
   const isAuthRoute = to.path.startsWith('/auth')
+
+  // Wait for auth store to be initialized
+  if (!authStore.initialized) {
+    // Create a promise that resolves when initialization is complete
+    await new Promise(resolve => {
+      const unwatch = watch(
+        () => authStore.initialized,
+        (initialized) => {
+          if (initialized) {
+            unwatch()
+            resolve()
+          }
+        },
+        { immediate: true }
+      )
+    })
+  }
   
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
     // Redirect to login if trying to access protected route while not authenticated

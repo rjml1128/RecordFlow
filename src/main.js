@@ -22,21 +22,8 @@ app.config.globalProperties.$dbOps = dbOperations
 app.config.globalProperties.$dataService = dataService
 app.config.globalProperties.$auth = auth
 
-// Initialize app
-Promise.all([
-  // Initialize local database
-  db.open().then(() => {
-    console.log('Local database initialized successfully')
-  }),
-  
-  // Wait for auth to initialize
-  new Promise(resolve => {
-    const unsubscribe = auth.onAuthStateChanged(() => {
-      unsubscribe()
-      resolve()
-    })
-  })
-]).then(() => {
+// Initialize app after auth is ready
+auth.authStateReady().then(() => {
   return Promise.all([
     // Initialize local database
     db.open().then(() => {
