@@ -37,6 +37,8 @@
           </div>
         </div>
       </div>
+
+      <DisplayCheck/>
     </div>
   </div>
 </template>
@@ -48,7 +50,7 @@ import { useAuth } from '@/composables/useAuth'
 import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
 import Header from '@/components/layout/header/Header.vue'
-
+import DisplayCheck from '@/components/layout/records/grade-level/displaycheck.vue'
 const router = useRouter()
 const authStore = useAuthStore()
 const { loading, logout } = useAuth()
