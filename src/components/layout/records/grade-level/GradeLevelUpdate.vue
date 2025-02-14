@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { RotateCw } from 'lucide-vue-next'
 
 const props = defineProps({
   initialName: {
@@ -28,11 +29,19 @@ const emit = defineEmits(['update'])
 
 const open = ref(false)
 const gradeName = ref(props.initialName)
+const isUpdating = ref(false)
 
-const handleSubmit = (e) => {
+const handleSubmit = async (e) => {
   e.preventDefault()
-  emit('update', gradeName.value)
-  open.value = false
+  if (gradeName.value.trim()) {
+    isUpdating.value = true
+    try {
+      await emit('update', gradeName.value.trim())
+      open.value = false
+    } finally {
+      isUpdating.value = false
+    }
+  }
 }
 
 const handleFocus = (e) => {
@@ -64,6 +73,7 @@ const handleFocus = (e) => {
               v-model="gradeName"
               class="col-span-3"
               autofocus
+              :disabled="isUpdating"
               @focus="handleFocus"
             />
             <p class="text-sm text-muted-foreground">
@@ -73,10 +83,26 @@ const handleFocus = (e) => {
         </div>
 
         <DialogFooter>
-          <Button type="button" variant="ghost" @click="open = false">
+          <Button 
+            type="button" 
+            variant="ghost" 
+            @click="open = false"
+            :disabled="isUpdating"
+          >
             Cancel
           </Button>
-          <Button type="submit">Update</Button>
+          <Button 
+            type="submit"
+            :disabled="isUpdating"
+          >
+            <template v-if="isUpdating">
+              <RotateCw class="mr-2 h-4 w-4 animate-spin" />
+              Updating
+            </template>
+            <template v-else>
+              Update
+            </template>
+          </Button>
         </DialogFooter>
       </form>
     </DialogContent>

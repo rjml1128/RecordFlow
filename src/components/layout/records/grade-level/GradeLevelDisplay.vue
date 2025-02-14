@@ -1,5 +1,5 @@
 <script setup>
-import { Card, CardContent } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { 
@@ -10,65 +10,63 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { 
   ChevronRight,
+  BookOpen,
+  GraduationCap,
   MoreVertical,
   Pencil,
-  Trash,
-  Users, 
-  Bookmark,
-  GraduationCap
+  Trash2
 } from 'lucide-vue-next'
 
-const props = defineProps({
+defineProps({
   gradeName: {
     type: String,
     default: 'First Year'
   }
 })
 
-const emit = defineEmits(['edit', 'delete'])
+defineEmits(['edit', 'delete'])
 </script>
 
 <template>
-  <Card class="w-[320px] bg-white border-gray-200 shadow-sm">
-    <CardContent class="p-6">
-      <div class="flex items-center justify-between mb-4">
-        <h3 class="text-lg font-semibold text-gray-900">{{ gradeName }}</h3>
+  <Card class="w-[280px]">
+    <CardHeader class="pb-3">
+      <div class="flex items-center justify-between">
+        <CardTitle class="text-base font-medium">{{ gradeName }}</CardTitle>
         <DropdownMenu>
           <DropdownMenuTrigger as-child>
-            <Button variant="ghost" class="h-8 w-8 p-0 text-gray-500 hover:text-gray-700">
-              <MoreVertical class="h-5 w-5" />
+            <Button variant="ghost" size="icon" class="h-8 w-8 -mr-2">
+              <MoreVertical class="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" class="w-[160px]">
-            <DropdownMenuItem @click="emit('edit')" class="text-gray-700">
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem @click="$emit('edit')">
               <Pencil class="mr-2 h-4 w-4" />
-              Edit
+              <span>Update</span>
             </DropdownMenuItem>
-            <DropdownMenuItem @click="emit('delete')" class="text-red-600">
-              <Trash class="mr-2 h-4 w-4" />
-              Delete
+            <DropdownMenuItem @click="$emit('delete')" class="text-red-600 focus:text-red-600">
+              <Trash2 class="mr-2 h-4 w-4" />
+              <span>Delete</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-
-      <Separator class="my-4 bg-gray-200" />
-
-      <div class="flex items-center justify-between mb-4 text-xs">
-        <div class="flex items-center gap-2">
-          <Bookmark class="h-4 w-4 text-gray-400" />
-          <span class="text-xs text-gray-500">No Subjects</span>
+    </CardHeader>
+    <Separator class="mb-4" />
+    <CardContent class="grid gap-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <BookOpen class="h-4 w-4 text-primary" />
+          <span class="text-sm text-muted-foreground">No Subjects</span>
         </div>
-        <Separator orientation="vertical" class="h-6 bg-gray-200" />
-        <div class="flex items-center gap-2">
-          <GraduationCap class="h-4 w-4 text-gray-400" />
-          <span class="text-xs text-gray-500">No Classes</span>
+        <Separator orientation="vertical" class="h-5" />
+        <div class="flex items-center gap-3">
+          <GraduationCap class="h-4 w-4 text-primary" />
+          <span class="text-sm text-muted-foreground">No Classes</span>
         </div>
       </div>
-
-      <Button variant="default" class="w-full bg-blue-600 hover:bg-blue-700 text-sm font-medium">
-        View Details
-        <ChevronRight class="ml-2 h-4 w-4" />
+      <Button variant="default" class="w-full">
+        <span>View Details</span>
+        <ChevronRight class="h-4 w-4 ml-2" />
       </Button>
     </CardContent>
   </Card>

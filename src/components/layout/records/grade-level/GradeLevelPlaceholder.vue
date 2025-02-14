@@ -1,30 +1,27 @@
 <script setup>
-import { Card, CardContent } from '@/components/ui/card'
+import { Card } from '@/components/ui/card'
 import { Plus } from 'lucide-vue-next'
+
+defineEmits(['click'])
 </script>
 
 <template>
-  <button class="block w-full cursor-pointer">
-    <Card class="w-[320px] border-2 border-dashed border-border/85 hover:border-muted-foreground/90 bg-background/60 hover:bg-muted/40 transition-all duration-200 group">
-      <CardContent class="p-6 min-h-[224px] flex flex-col items-center justify-center">
-        <div class="flex flex-col items-center py-8 space-y-4">
-          <div 
-            class="rounded-full border-2 border-border/85 group-hover:border-muted-foreground/90 p-2 transition-all duration-200"
-          >
-            <Plus 
-              class="h-6 w-6 text-muted-foreground/90 group-hover:text-muted-foreground transition-all duration-200" 
-            />
-          </div>
-          <div class="space-y-1 text-center">
-            <h3 class="font-medium text-muted-foreground/90 group-hover:text-muted-foreground transition-all duration-200">
-              Add Grade Level
-            </h3>
-            <p class="text-sm text-muted-foreground/85 group-hover:text-muted-foreground transition-all duration-200">
-              Create a new grade level
-            </p>
-          </div>
-        </div>
-      </CardContent>
+  <button type="button" class="w-[280px] group" @click="$emit('click')">
+    <Card
+      class="h-[180px] flex flex-col items-center justify-center gap-1.5
+        border-2 border-dashed border-muted
+        transition-colors duration-200
+        group-hover:border-primary/50"
+    >
+      <div class="h-10 w-10 rounded-full border-2 border-muted flex items-center justify-center transition-colors duration-200 group-hover:border-primary/50">
+        <Plus class="h-5 w-5 text-muted-foreground transition-colors duration-200 group-hover:text-primary" />
+      </div>
+      <h3 class="font-medium text-muted-foreground transition-colors duration-200 group-hover:text-primary">
+        Add Grade Level
+      </h3>
+      <p class="text-sm text-muted-foreground/60 transition-colors duration-200 group-hover:text-primary/80">
+        Create a new grade level
+      </p>
     </Card>
   </button>
 </template>

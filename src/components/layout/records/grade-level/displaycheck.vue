@@ -1,9 +1,10 @@
 <script setup>
 import GradeLevelEmptyState from './GradeLevelEmptyState.vue'
 import GradeLevelPlaceholder from './GradeLevelPlaceholder.vue'
-import GradeLevelAdd from './GradeLevelAdd.vue'
 import GradeLevelUpdate from './GradeLevelUpdate.vue'
 import GradeLevelDisplay from './GradeLevelDisplay.vue'
+import GradeLevelAdd from './GradeLevelAdd.vue';
+import GradeLevelDelete from './GradeLevelDelete.vue';
 </script>
 
 <template>
@@ -21,9 +22,10 @@ import GradeLevelDisplay from './GradeLevelDisplay.vue'
     <!-- Dialogs -->
     <div class="space-y-2">
       <h3 class="text-lg font-semibold text-gray-700">Dialog Components</h3>
-      <div class="flex items-center gap-4">
-        <GradeLevelAdd />
+      <div class="flex items-center gap-4">        
+        <GradeLevelAdd/>
         <GradeLevelUpdate initial-name="Example Grade" />
+        <GradeLevelDelete/>
       </div>
     </div>
 
@@ -44,6 +46,7 @@ import GradeLevelDisplay from './GradeLevelDisplay.vue'
         <!-- Placeholder Card (Always Last) -->
         <GradeLevelPlaceholder class="order-last" />
       </div>
+
     </div>
   </div>
 </template>
