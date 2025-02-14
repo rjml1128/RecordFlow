@@ -13,6 +13,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { RotateCw } from 'lucide-vue-next'
+import GradeLevelToast from './GradeLevelToast.vue'
 
 const props = defineProps({
   initialName: {
@@ -25,6 +26,7 @@ const props = defineProps({
   }
 })
 
+const toast = ref()
 const emit = defineEmits(['update'])
 
 const open = ref(false)
@@ -33,11 +35,15 @@ const isUpdating = ref(false)
 
 const handleSubmit = async (e) => {
   e.preventDefault()
-  if (gradeName.value.trim()) {
+  const name = gradeName.value.trim()
+  if (name) {
     isUpdating.value = true
     try {
-      await emit('update', gradeName.value.trim())
+      await emit('update', name)
+      toast.value.showUpdateSuccess(name)
       open.value = false
+    } catch (error) {
+      toast.value.showError('update', error.message)
     } finally {
       isUpdating.value = false
     }
@@ -107,4 +113,6 @@ const handleFocus = (e) => {
       </form>
     </DialogContent>
   </Dialog>
+
+  <GradeLevelToast ref="toast" />
 </template>

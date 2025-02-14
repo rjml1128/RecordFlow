@@ -13,7 +13,9 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { RotateCw } from 'lucide-vue-next'
+import GradeLevelToast from './GradeLevelToast.vue'
 
+const toast = ref()
 const emit = defineEmits(['add'])
 
 const open = ref(false)
@@ -22,12 +24,16 @@ const isSaving = ref(false)
 
 const handleSubmit = async (e) => {
   e.preventDefault()
-  if (gradeName.value.trim()) {
+  const name = gradeName.value.trim()
+  if (name) {
     isSaving.value = true
     try {
-      await emit('add', gradeName.value.trim())
+      await emit('add', name)
+      toast.value.showAddSuccess(name)
       gradeName.value = ''
       open.value = false
+    } catch (error) {
+      toast.value.showError('add', error.message)
     } finally {
       isSaving.value = false
     }
@@ -93,4 +99,6 @@ const handleSubmit = async (e) => {
       </form>
     </DialogContent>
   </Dialog>
+  
+  <GradeLevelToast ref="toast" />
 </template>

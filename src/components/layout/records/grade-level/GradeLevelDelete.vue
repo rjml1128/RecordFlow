@@ -13,6 +13,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
 import { RotateCw } from 'lucide-vue-next'
+import GradeLevelToast from './GradeLevelToast.vue'
 
 const props = defineProps({
   gradeName: {
@@ -21,6 +22,7 @@ const props = defineProps({
   }
 })
 
+const toast = ref()
 const emit = defineEmits(['delete'])
 
 const open = ref(false)
@@ -30,7 +32,10 @@ const handleDelete = async () => {
   isDeleting.value = true
   try {
     await emit('delete')
+    toast.value.showDeleteSuccess(props.gradeName)
     open.value = false
+  } catch (error) {
+    toast.value.showError('delete', error.message)
   } finally {
     isDeleting.value = false
   }
@@ -48,7 +53,8 @@ const handleDelete = async () => {
       <AlertDialogHeader>
         <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
         <AlertDialogDescription>
-          This action cannot be undone. This will permanently delete this grade level and all of its associated data.
+          This action cannot be undone. This will permanently delete the grade level
+          <span class="font-semibold">"{{ gradeName }}"</span> and all of its data.
         </AlertDialogDescription>
       </AlertDialogHeader>
       <AlertDialogFooter>
@@ -71,4 +77,6 @@ const handleDelete = async () => {
       </AlertDialogFooter>
     </AlertDialogContent>
   </AlertDialog>
+
+  <GradeLevelToast ref="toast" />
 </template>
