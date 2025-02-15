@@ -12,13 +12,13 @@ RecordFlow is a Progressive Web Application (PWA) designed for managing educatio
 - Conflict resolution handling
 
 ### 2. Authentication System
-- Initial online authentication required
-- Support for Google Sign-in and traditional authentication
+- Initial online authentication required (Google Sign-in or traditional auth)
+- Offline access with encrypted local credential storage
 - Universal 24-hour authentication expiry (online and offline)
 - 6-hour warning window for token refresh
 - Automatic token refresh for online users
 - Manual reconnection requirement for offline users
-- Encrypted local credential storage
+- Grace period for re-authentication to avoid immediate lockout
 - Consistent security policy across all users
 
 ### 3. Data Synchronization
@@ -26,7 +26,7 @@ Similar to GitHub Desktop's workflow:
 - Local changes are tracked and "staged"
 - Users can commit changes locally
 - Push commits to cloud when online
-- Pull remote changes when needed
+- Pull remote changes automatically when logging in on another device
 - Conflict resolution UI for merge conflicts
 
 #### Automatic Synchronization
@@ -39,6 +39,8 @@ Similar to GitHub Desktop's workflow:
 - Configurable auto-push feature:
   * Enable/disable auto-push
   * Set push interval (e.g., every 15 minutes)
+  * Auto-push on logout (if online)
+  * Reminder to push data before logging out
   * Only active when online
   * Automatic conflict detection and handling
 
@@ -59,7 +61,6 @@ Similar to GitHub Desktop's workflow:
 
 ### 1. Database Structure (Dexie.js)
 ```javascript
-// Database Schema
 {
   gradeLevels: '++id, name, createdAt, updatedAt, syncStatus',
   changes: '++id, timestamp, type, entityId, syncStatus',
@@ -78,10 +79,10 @@ Similar to GitHub Desktop's workflow:
 2. Subsequent Access
    ├─ Online: Verify with Firebase
    └─ Offline: Check local credentials
-      └─ Verify expiry (24h limit)
+      └─ Verify expiry & apply grace period
 ```
 
-### 3. Sync Mechanism
+### 3. Sync Management
 ```
 Local Changes
     │
@@ -98,35 +99,9 @@ Push to Cloud (When Online)
 Handle Conflicts
 ```
 
-### 4. File Structure
-```
-src/
-├── components/
-│   ├── auth/
-│   ├── sync/
-│   └── ui/
-├── composables/
-│   ├── useAuth.js
-│   ├── useDatabase.js
-│   └── useSync.js
-├── lib/
-│   ├── db/
-│   │   ├── index.js
-│   │   └── migrations.js
-│   ├── sync/
-│   │   ├── changes.js
-│   │   └── conflicts.js
-│   └── auth/
-│       ├── online.js
-│       └── offline.js
-└── stores/
-    ├── auth.js
-    └── sync.js
-```
+### 4. Implementation Examples
 
-## Implementation Guidelines
-
-### 1. Local Database Setup
+#### Basic Database Setup
 ```javascript
 import Dexie from 'dexie';
 
@@ -151,62 +126,49 @@ class RecordFlowDB extends Dexie {
 }
 ```
 
-### 2. Auth Integration
+#### Enhanced Auth Management
 ```javascript
-// Offline auth check
-async function checkOfflineAuth() {
-  const auth = await db.auth.get(1);
-  if (!auth) return false;
-  
-  const now = new Date();
-  const expiry = new Date(auth.expiry);
-  
-  return expiry > now;
-}
+class AuthManager {
+  static AUTH_CONFIG = {
+    expiryTime: 24 * 60 * 60 * 1000,    // 24 hours for all users
+    warningWindow: 6 * 60 * 60 * 1000,  // 6-hour warning
+    gracePeriod: 1 * 60 * 60 * 1000,    // 1-hour grace period
+    checkInterval: 15 * 60 * 1000       // Check every 15 minutes
+  };
 
-// Auth storage
-async function storeAuthCredentials(tokens) {
-  const expiry = new Date();
-  expiry.setHours(expiry.getHours() + 24);
-  
-  await db.auth.put({
-    id: 1,
-    tokens,
-    expiry
-  });
-}
-```
+  async checkAuthStatus() {
+    const auth = await db.auth.get(1);
+    if (!auth) return { status: 'no-auth' };
 
-### 3. Sync Management
-
-#### Basic Operations
-```javascript
-async function trackChange(type, entityId, data) {
-  await db.changes.add({
-    timestamp: new Date(),
-    type,
-    entityId,
-    data,
-    syncStatus: 'pending'
-  });
-}
-
-async function pushChanges() {
-  const changes = await db.changes
-    .where('syncStatus')
-    .equals('pending')
-    .toArray();
+    const now = new Date();
+    const expiry = new Date(auth.expiry);
+    const graceExpiry = new Date(expiry.getTime() + AuthManager.AUTH_CONFIG.gracePeriod);
     
-  // Push to cloud
-  for (const change of changes) {
-    try {
-      await syncToCloud(change);
-      await db.changes.update(change.id, {
-        syncStatus: 'synced'
-      });
-    } catch (error) {
-      // Handle sync error
+    if (graceExpiry <= now) {
+      return { status: 'expired' };
     }
+
+    if (expiry <= now) {
+      return {
+        status: 'grace-period',
+        message: 'Authentication expired. Please connect to refresh within grace period.'
+      };
+    }
+
+    // Check warning window
+    const warningTime = new Date(expiry - AuthManager.AUTH_CONFIG.warningWindow);
+    if (now >= warningTime) {
+      if (navigator.onLine) {
+        await this.refreshToken();
+      } else {
+        return {
+          status: 'warning',
+          message: 'Authentication will expire soon. Please connect to refresh.'
+        };
+      }
+    }
+
+    return { status: 'valid' };
   }
 }
 ```
@@ -232,6 +194,15 @@ class AutoSyncManager {
       setInterval(() => this.performAutoPush(),
         this.config.autoPush.interval);
     }
+
+    // Setup auto-push on logout
+    window.addEventListener('beforeunload', async () => {
+      if (navigator.onLine) {
+        await this.performFinalPush();
+      } else {
+        this.showPushReminder();
+      }
+    });
   }
 
   async performAutoCommit() {
@@ -275,43 +246,14 @@ class AutoSyncManager {
       }
     }
   }
-}
-```
 
-#### Enhanced Auth Management
-```javascript
-class AuthManager {
-  static AUTH_CONFIG = {
-    expiryTime: 24 * 60 * 60 * 1000,    // 24 hours for all users
-    warningWindow: 6 * 60 * 60 * 1000,  // 6-hour warning
-    checkInterval: 15 * 60 * 1000       // Check every 15 minutes
-  };
+  async performFinalPush() {
+    await this.performAutoCommit();
+    await this.performAutoPush();
+  }
 
-  async checkAuthStatus() {
-    const auth = await db.auth.get(1);
-    if (!auth) return { status: 'no-auth' };
-
-    const now = new Date();
-    const expiry = new Date(auth.expiry);
-    
-    if (expiry <= now) {
-      return { status: 'expired' };
-    }
-
-    // Check warning window
-    const warningTime = new Date(expiry - AuthManager.AUTH_CONFIG.warningWindow);
-    if (now >= warningTime) {
-      if (navigator.onLine) {
-        await this.refreshToken();
-      } else {
-        return {
-          status: 'warning',
-          message: 'Authentication will expire soon. Please connect to refresh.'
-        };
-      }
-    }
-
-    return { status: 'valid' };
+  showPushReminder() {
+    // Show notification to remind user about unpushed changes
   }
 }
 ```
@@ -329,18 +271,27 @@ class AuthManager {
    - Clear auth data on logout
    - Show clear auth status
    - Warn before expiry
+   - Implement grace period properly
 
 3. Offline Support
    - Clear offline indicators
    - Background sync when possible
    - Data validation locally
    - Conflict resolution UI
+   - Manage sync queues effectively
 
 4. Performance
    - Efficient indexing
    - Batch operations
-   - Lazy loading
+   - Strategic Code Splitting:
+     * Route-based splitting for main views (already implemented for auth)
+     * Feature-based splitting for grade level management
+     * Component library chunking
+     * Async component loading for heavy UI elements
    - Resource caching
+   - Optimize change tracking
+
+
 
 ## Development Workflow
 
@@ -365,6 +316,8 @@ class AuthManager {
    - Toggle offline mode
    - Test sync scenarios
    - Verify data persistence
+   - Test auth expiry scenarios
+   - Validate grace period functionality
 
 ## Deployment Considerations
 
@@ -378,16 +331,27 @@ class AuthManager {
    - IndexedDB storage limits
    - Data cleanup strategies
    - Migration handling
+   - Sync conflict strategies
 
 3. Authentication
    - Firebase configuration
    - OAuth setup
    - Security rules
+   - Grace period configuration
 
 4. Performance
    - Caching strategies
    - Bundle optimization
-   - Lazy loading
+:
+     * Dynamic imports for route components
+     * Feature flags for conditional code loading
+     * Separate chunks for grade level management features
+     * On-demand loading for UI components
+   - Build-time optimizations:
+     * Tree-shaking unused components
+     * Modern bundle for modern browsers
+     * Legacy bundle for older browsers
+   - Background sync optimization
 
 ## Future Considerations
 
@@ -410,3 +374,4 @@ class AuthManager {
    - Multi-device sync
    - Collaborative editing
    - Version history
+   - Real-time sync options
