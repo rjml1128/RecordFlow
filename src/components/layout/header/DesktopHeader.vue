@@ -2,29 +2,44 @@
   <header class="border-b">
     <div class="flex h-16 items-center justify-between px-6">
       <div class="flex items-center">
-        <router-link to="/" class="text-xl font-semibold mr-16">
+        <router-link to="/" class="text-2xl text-primary font-bold mr-16">
           RecordFlow
         </router-link>
         <nav class="flex items-center">
-          <router-link
-            to="/dashboard"
-            class="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary px-4"
+          <router-link 
+            :to="{ name: 'overview'}" 
+            :class="[
+              'flex items-center gap-2 text-sm font-medium px-4 transition-colors',
+              $route.name === 'overview' 
+                ? 'text-primary' 
+                : 'text-muted-foreground hover:text-primary'
+            ]"
           >
             <LayoutDashboard class="h-4 w-4" />
             Dashboard
           </router-link>
           <Separator orientation="vertical" class="h-6" />
-          <router-link
-            to="/records"
-            class="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary px-4"
+          <router-link 
+            :to="{ name: 'records' }"
+            :class="[
+              'flex items-center gap-2 text-sm font-medium px-4 transition-colors',
+              $route.name === 'records' 
+                ? 'text-primary' 
+                : 'text-muted-foreground hover:text-primary'
+            ]"
           >
             <Layers class="h-4 w-4" />
             Records
           </router-link>
           <Separator orientation="vertical" class="h-6" />
-          <router-link
+          <router-link 
             to="/settings"
-            class="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary px-4"
+            :class="[
+              'flex items-center gap-2 text-sm font-medium px-4 transition-colors',
+              $route.path.startsWith('/settings') 
+                ? 'text-primary' 
+                : 'text-muted-foreground hover:text-primary'
+            ]"
           >
             <Settings class="h-4 w-4" />
             Settings
@@ -43,10 +58,10 @@
           <DropdownMenuTrigger :as-child="true">
             <Button variant="ghost" class="flex items-center gap-1 px-2">
               <Avatar class="h-8 w-8">
-                <AvatarImage
-                  v-if="authStore.user?.photoURL"
+                <AvatarImage 
+                  v-if="authStore.user?.photoURL" 
                   :src="authStore.user.photoURL"
-                  :alt="authStore.userFullName"
+                  :alt="authStore.userFullName" 
                 />
                 <AvatarFallback>
                   {{ authStore.userInitials }}
@@ -61,8 +76,8 @@
               <p class="text-xs text-muted-foreground truncate">{{ authStore.user?.email }}</p>
             </div>
             <div class="p-1">
-              <DropdownMenuItem
-                class="flex items-center gap-2 cursor-pointer dropdown-menu-item"
+              <DropdownMenuItem 
+                class="flex items-center gap-2 cursor-pointer dropdown-menu-item" 
                 @click="handleLogout"
                 :disabled="loading"
               >

@@ -10,12 +10,12 @@ import { SwatchBook, Plus } from 'lucide-vue-next'
       <SwatchBook class="w-10 h-10 text-primary" />
 
       <div class="space-y-2">
-        <h3 class="font-semibold text-lg">No Grade Levels Yet</h3>
-        <p class="text-sm text-muted-foreground">Get started by creating your first grade level.</p>
+        <h3 class="font-semibold text-xl text-primary">No Grade Levels Yet</h3>
+        <p class="text-sm text-muted-foreground">Get started by creating your first grade level by clicking the create button.</p>
       </div>
 
-      <Button>
-        <Plus class=" h-4 w-4" />
+      <Button variant="outline" class="bg-primary text-white hover:bg-primary/90 hover:text-white">
+        <Plus class="mr-1 h-4 w-4" />
         Create Now
       </Button>
     </CardContent>
