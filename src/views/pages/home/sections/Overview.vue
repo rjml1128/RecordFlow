@@ -55,7 +55,8 @@
 <script setup>
   import { Button } from '@/components/ui/button'
   import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
-  import { useAuth } from '@/composables/useAuth'
+  import { Separator } from '@/components/ui/separator'
+  import { useAuth } from '@/services/auth/useAuth.js'
   import { useAuthStore } from '@/stores/auth'
   import { useRouter } from 'vue-router'
   import DisplayCheck from '@/components/layout/records/grade-level/displaycheck.vue'

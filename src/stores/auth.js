@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { auth } from '@/lib/firebase'
-import { useFirestore } from '@/composables/useFirestore'
+import { auth } from '@/services/core/firebase'
+import { useFirestore } from '@/services/database/useFirestore'
 
 export const useAuthStore = defineStore('auth', () => {
   // State

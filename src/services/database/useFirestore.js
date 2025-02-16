@@ -11,8 +11,8 @@ import {
   where,
   orderBy 
 } from 'firebase/firestore'
-import { db } from '@/lib/firebase'
-import { dataService } from '@/lib/dataService'
+import { db } from '../core/firebase'
+import { dataService } from './dataService'
 import { useAuthStore } from '@/stores/auth'
 
 export function useFirestore() {

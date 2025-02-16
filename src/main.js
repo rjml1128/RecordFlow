@@ -1,9 +1,8 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
-import { db, dbOperations } from './lib/db'
-import { auth } from './lib/firebase'
-import { dataService } from './lib/dataService'
+import { auth } from './services/core/firebase'
 import { useAuthStore } from './stores/auth'
+import { createServices } from './services'
 
 import './assets/main.css'
 
@@ -13,29 +12,25 @@ import router from './router/router'
 const app = createApp(App)
 const pinia = createPinia()
 
+// Install plugins
 app.use(pinia)
 app.use(router)
-
-// Make services available globally
-app.config.globalProperties.$db = db
-app.config.globalProperties.$dbOps = dbOperations
-app.config.globalProperties.$dataService = dataService
-app.config.globalProperties.$auth = auth
+app.use(createServices())
 
 // Initialize app after auth is ready
 auth.authStateReady().then(() => {
   return Promise.all([
-    // Initialize local database
-    db.open().then(() => {
-      console.log('Local database initialized successfully')
-    }),
-    
     // Wait for auth to initialize
     new Promise(resolve => {
       const unsubscribe = auth.onAuthStateChanged(() => {
         unsubscribe()
         resolve()
       })
+    }),
+    
+    // Initialize services as needed
+    window.$db?.open().then(() => {
+      console.log('Local database initialized successfully')
     })
   ])
 })

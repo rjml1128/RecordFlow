@@ -8,9 +8,9 @@ import {
   sendPasswordResetEmail,
 } from 'firebase/auth'
 import { doc, setDoc } from 'firebase/firestore'
-import { auth, db, handleAuthError, mergeGoogleProfile } from '@/lib/firebase'
+import { auth, db, handleAuthError, mergeGoogleProfile } from '../core/firebase'
 import { useAuthStore } from '@/stores/auth'
-import { useFirestore } from './useFirestore'
+import { useFirestore } from '../database/useFirestore'
 
 export function useAuth() {
   const loading = ref(false)

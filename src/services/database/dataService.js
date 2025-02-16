@@ -1,4 +1,4 @@
-import { db as firebaseDb, rtdb, auth } from './firebase';
+import { db as firebaseDb, rtdb, auth } from '../core/firebase';
 import { db as localDb, dbOperations } from './db';
 import { collection, addDoc, updateDoc, deleteDoc, doc, getDocs, onSnapshot, getDoc, setDoc } from 'firebase/firestore';
 import { ref, set, get, child, update } from 'firebase/database';
