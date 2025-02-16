@@ -54,18 +54,18 @@ defineEmits(['edit', 'delete'])
     <Separator class="mb-4" />
     <CardContent class="grid gap-4">
       <div class="flex items-center justify-between">
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2">
           <BookOpen class="h-4 w-4 text-primary" />
-          <span class="text-sm text-muted-foreground">No Subjects</span>
+          <span class="text-muted-foreground text-xs">No Subjects</span>
         </div>
         <Separator orientation="vertical" class="h-5" />
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2">
           <GraduationCap class="h-4 w-4 text-primary" />
-          <span class="text-sm text-muted-foreground">No Classes</span>
+          <span class="text-muted-foreground text-xs">No Classes</span>
         </div>
       </div>
-      <Button variant="default" class="w-full bg-primary text-primary-foreground hover:bg-primary/90">
-        <span>View Details</span>
+      <Button variant="default" class="w-full bg-primary text-primary-foreground hover:bg-primary/90 mt-1">
+        <span>View Subjects</span>
         <ChevronRight class="h-4 w-4 ml-2 transition-transform duration-200 group-hover:translate-x-0.5" />
       </Button>
     </CardContent>

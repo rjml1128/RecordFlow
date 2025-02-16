@@ -14,8 +14,8 @@ const dialog = useDialogStore()
     <div class="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-4 flex flex-col flex-grow">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div class="space-y-1">
-          <h1 class="text-2xl font-bold tracking-tight">Grade Levels</h1>
-          <p class="text-muted-foreground">Manage all your handled grade levels</p>
+          <h1 class="text-2xl font-semibold tracking-tight">Grade Levels</h1>
+          <p class="text-muted-foreground text-sm">Manage all your handled grade levels</p>
         </div>
         <Button 
           variant="outline" 
@@ -24,7 +24,6 @@ const dialog = useDialogStore()
             focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2
             disabled:pointer-events-none disabled:opacity-50"
           @click="dialog.openGradeLevelAdd"
- 
         >
           <Plus class="mr-1 h-4 w-4" />
           Create Now

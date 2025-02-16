@@ -1,6 +1,5 @@
 <script setup>
 import { defineAsyncComponent } from 'vue'
-import GradeLevelAdd from '@/components/layout/records/grade-level/GradeLevelAdd.vue'
 
 const Toaster = defineAsyncComponent(() => 
   import('@/components/ui/toast/Toaster.vue')
