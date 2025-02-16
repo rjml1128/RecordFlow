@@ -32,7 +32,7 @@
     --border:214.3 31.8% 91.4%;
     --input:214.3 31.8% 91.4%;
     --ring:221.2 83.2% 53.3%;
-    --radius: 0.75rem;
+    --radius: 0.5rem;
   }
    
   .dark {
@@ -66,6 +66,7 @@
   }
 }
 
+
 @layer base {
   * {
     @apply border-border;
@@ -73,5 +74,40 @@
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@layer components {
+  /* Text sizes with responsive scaling */
+  .text-display {
+    @apply text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight;
+  }
+
+  .text-section-title {
+    @apply text-xl sm:text-2xl md:text-2xl font-semibold text-primary tracking-tight;
+  }
+
+  .text-section-description {
+    @apply text-xs sm:text-sm text-muted-foreground;
+  }
+
+  .text-card-title {
+    @apply text-lg sm:text-xl md:text-xl font-medium text-foreground;
+  }
+
+  .text-card-description {
+    @apply text-sm text-muted-foreground;
+  }
+
+  .text-body-large {
+    @apply text-base md:text-lg leading-relaxed;
+  }
+
+  .text-body {
+    @apply text-sm md:text-base leading-relaxed;
+  }
+
+  .text-body-small {
+    @apply text-xs md:text-sm leading-relaxed;
   }
 }

@@ -31,7 +31,7 @@ defineEmits(['edit', 'delete'])
   <Card class="w-[280px]">
     <CardHeader class="pb-3">
       <div class="flex items-center justify-between">
-        <CardTitle class="text-base font-medium">{{ gradeName }}</CardTitle>
+        <CardTitle class="text-card-title">{{ gradeName }}</CardTitle>
         <DropdownMenu>
           <DropdownMenuTrigger as-child>
             <Button variant="ghost" size="icon" class="h-8 w-8 -mr-2">
@@ -56,12 +56,12 @@ defineEmits(['edit', 'delete'])
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-3">
           <BookOpen class="h-4 w-4 text-primary" />
-          <span class="text-sm text-muted-foreground">No Subjects</span>
+          <span class="text-body-small">No Subjects</span>
         </div>
         <Separator orientation="vertical" class="h-5" />
         <div class="flex items-center gap-3">
           <GraduationCap class="h-4 w-4 text-primary" />
-          <span class="text-sm text-muted-foreground">No Classes</span>
+          <span class="text-body-small">No Classes</span>
         </div>
       </div>
       <Button variant="default" class="w-full">

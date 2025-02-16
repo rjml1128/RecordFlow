@@ -2,6 +2,9 @@
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { SwatchBook, Plus } from 'lucide-vue-next'
+import { useGradeLevelDialogStore } from './useGradeLevelDialogStore'
+
+const dialog = useGradeLevelDialogStore()
 </script>
 
 <template>
@@ -10,11 +13,15 @@ import { SwatchBook, Plus } from 'lucide-vue-next'
       <SwatchBook class="w-10 h-10 text-primary" />
 
       <div class="space-y-2">
-        <h3 class="font-semibold text-xl text-primary">No Grade Levels Yet</h3>
-        <p class="text-sm text-muted-foreground">Get started by creating your first grade level by clicking the create button.</p>
+        <h3 class="text-card-title text-primary">No Grade Levels Yet</h3>
+        <p class="text-card-description">Get started by creating your first grade level by clicking the create button.</p>
       </div>
 
-      <Button variant="outline" class="bg-primary text-white hover:bg-primary/90 hover:text-white">
+      <Button 
+        variant="outline" 
+        class="bg-primary text-white hover:bg-primary/90 hover:text-white"
+        @click="dialog.openAddDialog"
+      >
         <Plus class="mr-1 h-4 w-4" />
         Create Now
       </Button>

@@ -1,5 +1,7 @@
 <script setup>
 import { defineAsyncComponent } from 'vue'
+import GradeLevelAdd from '@/components/layout/records/grade-level/GradeLevelAdd.vue'
+
 const Toaster = defineAsyncComponent(() => 
   import('@/components/ui/toast/Toaster.vue')
 )
@@ -8,6 +10,7 @@ const Toaster = defineAsyncComponent(() =>
 <template>
   <div class="min-h-screen bg-background">
     <RouterView />
+    <GradeLevelAdd />
     <Toaster 
       :closeButton="true"
       :richColors="true"

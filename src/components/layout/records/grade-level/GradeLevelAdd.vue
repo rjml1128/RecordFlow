@@ -14,11 +14,12 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { RotateCw } from 'lucide-vue-next'
 import GradeLevelToast from './GradeLevelToast.vue'
+import { useGradeLevelDialogStore } from './useGradeLevelDialogStore'
 
+const dialog = useGradeLevelDialogStore()
 const toast = ref()
 const emit = defineEmits(['add'])
 
-const open = ref(false)
 const gradeName = ref('')
 const isSaving = ref(false)
 
@@ -31,7 +32,7 @@ const handleSubmit = async (e) => {
       await emit('add', name)
       toast.value.showAddSuccess(name)
       gradeName.value = ''
-      open.value = false
+      dialog.closeAddDialog()
     } catch (error) {
       toast.value.showError('add', error.message)
     } finally {
@@ -42,7 +43,10 @@ const handleSubmit = async (e) => {
 </script>
 
 <template>
-  <Dialog v-model:open="open">
+  <Dialog 
+    v-model:open="dialog.isAddDialogOpen"
+    @update:open="dialog.closeAddDialog"
+  >
     <DialogTrigger as-child>
       <slot>
         <Button variant="outline">Add Grade Level</Button>
@@ -78,7 +82,7 @@ const handleSubmit = async (e) => {
           <Button 
             type="button" 
             variant="ghost" 
-            @click="open = false"
+            @click="dialog.closeAddDialog"
             :disabled="isSaving"
           >
             Cancel
