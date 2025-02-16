@@ -105,7 +105,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import IconGoogle from '@/components/icons/IconGoogle.vue'
 import { useAuth } from '@/composables/useAuth'
-import { useAuthStore } from '@/stores/auth'
+import { useAuthStore } from '@/stores/authStore'
 
 const router = useRouter()
 const authStore = useAuthStore()

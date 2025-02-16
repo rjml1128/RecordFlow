@@ -13,7 +13,7 @@ import {
 } from 'firebase/firestore'
 import { db } from '../core/firebase'
 import { dataService } from './useDataService'
-import { useAuthStore } from '@/stores/auth'
+import { useAuthStore } from '@/stores/authStore'
 
 export function useFirestore() {
   const loading = ref(false)

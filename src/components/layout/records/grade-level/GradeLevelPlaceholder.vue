@@ -1,13 +1,13 @@
 <script setup>
 import { Card } from '@/components/ui/card'
 import { Plus } from 'lucide-vue-next'
-import { useGradeLevelDialogStore } from './useGradeLevelDialogStore'
+import { useDialogStore } from '@/stores/dialogStore'
 
-const dialog = useGradeLevelDialogStore()
+const dialog = useDialogStore()
 </script>
 
 <template>
-  <button type="button" class="w-[280px] group" @click="dialog.openAddDialog">
+  <button type="button" class="w-[280px] group" @click="dialog.openGradeLevelAdd">
     <Card
       class="h-[180px] flex flex-col items-center justify-center gap-1.5
         border-2 border-dashed border-muted

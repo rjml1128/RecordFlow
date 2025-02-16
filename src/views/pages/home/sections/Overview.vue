@@ -57,7 +57,7 @@
   import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
   import { Separator } from '@/components/ui/separator'
   import { useAuth } from '@/services/auth/useAuth.js'
-  import { useAuthStore } from '@/stores/auth'
+  import { useAuthStore } from '@/stores/authStore'
   import { useRouter } from 'vue-router'
   import DisplayCheck from '@/components/layout/records/grade-level/displaycheck.vue'
   const router = useRouter()

@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
 import { watch } from "vue";
-import { useAuthStore } from "@/stores/auth";
+import { useAuthStore } from "@/stores/authStore";
 import AuthView from "@/views/auth/AuthView.vue";
 import DashboardView from "@/views/dashboard/DashboardView.vue";
 import path from "path";

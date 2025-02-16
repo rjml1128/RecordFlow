@@ -2,9 +2,9 @@
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { SwatchBook, Plus } from 'lucide-vue-next'
-import { useGradeLevelDialogStore } from './useGradeLevelDialogStore'
+import { useDialogStore } from '@/stores/dialogStore'
 
-const dialog = useGradeLevelDialogStore()
+const dialog = useDialogStore()
 </script>
 
 <template>
@@ -20,7 +20,7 @@ const dialog = useGradeLevelDialogStore()
       <Button 
         variant="outline" 
         class="bg-primary text-white hover:bg-primary/90 hover:text-white"
-        @click="dialog.openAddDialog"
+        @click="dialog.openGradeLevelAdd"
       >
         <Plus class="mr-1 h-4 w-4" />
         Create Now

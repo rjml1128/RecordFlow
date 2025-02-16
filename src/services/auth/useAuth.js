@@ -9,7 +9,7 @@ import {
 } from 'firebase/auth'
 import { doc, setDoc } from 'firebase/firestore'
 import { auth, db, handleAuthError, mergeGoogleProfile } from '../core/firebase'
-import { useAuthStore } from '@/stores/auth'
+import { useAuthStore } from '@/stores/authStore'
 import { useFirestore } from '../database/useFirestoreService'
 
 export function useAuth() {

@@ -2,10 +2,10 @@
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { Plus } from 'lucide-vue-next'
-import { useGradeLevelDialogStore } from '@/components/layout/records/grade-level/useGradeLevelDialogStore'
+import { useDialogStore } from '@/stores/dialogStore'
 import GradeLevelEmptyState from '@/components/layout/records/grade-level/GradeLevelEmptyState.vue'
 
-const dialog = useGradeLevelDialogStore()
+const dialog = useDialogStore()
 </script>
 
 <template>
@@ -20,7 +20,7 @@ const dialog = useGradeLevelDialogStore()
         <Button 
           variant="outline" 
           class="hidden sm:flex bg-primary text-white hover:bg-primary/90 hover:text-white sm:w-auto"
-          @click="dialog.openAddDialog"
+          @click="dialog.openGradeLevelAdd"
         >
           <Plus class="mr-1 h-4 w-4" />
           Create Now

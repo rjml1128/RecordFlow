@@ -1,7 +1,7 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import { auth } from './services/core/firebase'
-import { useAuthStore } from './stores/auth'
+import { useAuthStore } from './stores/authStore'
 import { createServices } from './services'
 
 import './assets/main.css'
