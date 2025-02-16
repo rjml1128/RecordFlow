@@ -14,13 +14,13 @@ const dialog = useDialogStore()
         transition-colors duration-200
         group-hover:border-primary/50"
     >
-      <div class="h-10 w-10 rounded-full border-2 border-muted flex items-center justify-center transition-colors duration-200 group-hover:border-primary/50">
-        <Plus class="h-5 w-5 text-muted-foreground transition-colors duration-200 group-hover:text-primary" />
+      <div class="h-10 w-10 rounded-full border-2 border-muted flex items-center justify-center transition-colors duration-200 group-hover:border-primary">
+        <Plus class="h-5 w-5 text-muted-foreground transition-colors duration-200 group-hover:text-primary/80" />
       </div>
-      <h3 class="text-card-title transition-colors duration-200 group-hover:text-primary">
+      <h3 class="font-semibold transition-colors duration-200 text-foreground group-hover:text-primary">
         Add Grade Level
       </h3>
-      <p class="text-card-description transition-colors duration-200 group-hover:text-primary/80">
+      <p class="text-sm text-muted-foreground transition-colors duration-200 group-hover:text-primary/60">
         Create a new grade level
       </p>
     </Card>

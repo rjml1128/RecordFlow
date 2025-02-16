@@ -49,14 +49,14 @@ const handleSubmit = async (e) => {
   >
     <DialogTrigger as-child>
       <slot>
-        <Button variant="outline">Add Grade Level</Button>
+        <Button variant="outline" class="bg-primary text-primary-foreground hover:bg-primary/90">Add Grade Level</Button>
       </slot>
     </DialogTrigger>
     <DialogContent class="sm:max-w-[425px]">
       <form @submit="handleSubmit">
         <DialogHeader>
-          <DialogTitle>Add New Grade Level</DialogTitle>
-          <DialogDescription>
+          <DialogTitle class="text-lg font-semibold leading-none tracking-tight">Add New Grade Level</DialogTitle>
+          <DialogDescription class="text-sm text-muted-foreground">
             Please enter a unique grade level name. Duplicate names are not allowed.
           </DialogDescription>
         </DialogHeader>
@@ -72,7 +72,7 @@ const handleSubmit = async (e) => {
               autofocus
               :disabled="isSaving"
             />
-            <p class="text-sm text-muted-foreground">
+            <p class="text-[0.8rem] text-muted-foreground">
               This name will be displayed in the grade levels list.
             </p>
           </div>
@@ -89,6 +89,7 @@ const handleSubmit = async (e) => {
           </Button>
           <Button 
             type="submit"
+ class="bg-primary text-primary-foreground hover:bg-primary/90"
             :disabled="isSaving"
           >
             <template v-if="isSaving">
@@ -96,6 +97,7 @@ const handleSubmit = async (e) => {
               Saving
             </template>
             <template v-else>
+              <Plus class="mr-2 h-4 w-4" />
               Add
             </template>
           </Button>

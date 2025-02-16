@@ -46,7 +46,7 @@ const handleDelete = async () => {
   <AlertDialog v-model:open="open">
     <AlertDialogTrigger as-child>
       <slot>
-        <Button variant="outline" class="text-red-600">Delete Grade Level</Button>
+        <Button variant="outline" class="text-destructive hover:bg-destructive/10">Delete Grade Level</Button>
       </slot>
     </AlertDialogTrigger>
     <AlertDialogContent class="sm:max-w-[425px]">
@@ -62,7 +62,7 @@ const handleDelete = async () => {
           Cancel
         </AlertDialogCancel>
         <AlertDialogAction
-          class="bg-red-600 text-white hover:bg-red-700 focus:ring-red-600"
+          class="bg-destructive text-destructive-foreground hover:bg-destructive/90 focus-visible:ring-destructive"
           :disabled="isDeleting"
           @click="handleDelete"
         >
@@ -71,7 +71,7 @@ const handleDelete = async () => {
             Deleting
           </template>
           <template v-else>
-            Delete
+            <Trash2 class="mr-2 h-4 w-4" /> Delete
           </template>
         </AlertDialogAction>
       </AlertDialogFooter>

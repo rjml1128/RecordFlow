@@ -31,7 +31,7 @@ defineEmits(['edit', 'delete'])
   <Card class="w-[280px]">
     <CardHeader class="pb-3">
       <div class="flex items-center justify-between">
-        <CardTitle class="text-card-title">{{ gradeName }}</CardTitle>
+        <CardTitle class="text-base font-semibold text-foreground">{{ gradeName }}</CardTitle>
         <DropdownMenu>
           <DropdownMenuTrigger as-child>
             <Button variant="ghost" size="icon" class="h-8 w-8 -mr-2">
@@ -43,7 +43,7 @@ defineEmits(['edit', 'delete'])
               <Pencil class="mr-2 h-4 w-4" />
               <span>Update</span>
             </DropdownMenuItem>
-            <DropdownMenuItem @click="$emit('delete')" class="text-red-600 focus:text-red-600">
+            <DropdownMenuItem @click="$emit('delete')" class="text-destructive focus:text-destructive">
               <Trash2 class="mr-2 h-4 w-4" />
               <span>Delete</span>
             </DropdownMenuItem>
@@ -56,17 +56,17 @@ defineEmits(['edit', 'delete'])
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-3">
           <BookOpen class="h-4 w-4 text-primary" />
-          <span class="text-body-small">No Subjects</span>
+          <span class="text-sm text-muted-foreground">No Subjects</span>
         </div>
         <Separator orientation="vertical" class="h-5" />
         <div class="flex items-center gap-3">
           <GraduationCap class="h-4 w-4 text-primary" />
-          <span class="text-body-small">No Classes</span>
+          <span class="text-sm text-muted-foreground">No Classes</span>
         </div>
       </div>
-      <Button variant="default" class="w-full">
+      <Button variant="default" class="w-full bg-primary text-primary-foreground hover:bg-primary/90">
         <span>View Details</span>
-        <ChevronRight class="h-4 w-4 ml-2" />
+        <ChevronRight class="h-4 w-4 ml-2 transition-transform duration-200 group-hover:translate-x-0.5" />
       </Button>
     </CardContent>
   </Card>
