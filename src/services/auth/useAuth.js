@@ -10,7 +10,7 @@ import {
 import { doc, setDoc } from 'firebase/firestore'
 import { auth, db, handleAuthError, mergeGoogleProfile } from '../core/firebase'
 import { useAuthStore } from '@/stores/auth'
-import { useFirestore } from '../database/useFirestore'
+import { useFirestore } from '../database/useFirestoreService'
 
 export function useAuth() {
   const loading = ref(false)

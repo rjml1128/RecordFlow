@@ -1,6 +1,6 @@
 import { db, dbOperations } from './database/db'
 import { auth } from './core/firebase'
-import { dataService } from './database/dataService'
+import { dataService } from './database/useDataService'
 
 export const createServices = () => {
   return {

@@ -12,7 +12,7 @@ import {
   orderBy 
 } from 'firebase/firestore'
 import { db } from '../core/firebase'
-import { dataService } from './dataService'
+import { dataService } from './useDataService'
 import { useAuthStore } from '@/stores/auth'
 
 export function useFirestore() {
