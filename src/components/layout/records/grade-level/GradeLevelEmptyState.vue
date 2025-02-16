@@ -13,7 +13,7 @@ const dialog = useDialogStore()
       <SwatchBook class="w-10 h-10 text-primary" />
 
       <div class="space-y-2">
-        <h3 class="text-lg font-semibold text-primary">No Grade Levels Yet</h3>
+        <h3 class="text-xl font-semibold ">No Grade Levels Yet</h3>
         <p class="text-sm text-muted-foreground">Get started by creating your first grade level by clicking the create button.</p>
       </div>
 
