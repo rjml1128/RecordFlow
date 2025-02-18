@@ -56,26 +56,33 @@ export const handleAuthError = (error) => {
 };
 
 // Helper function to merge Google profile data
-export const mergeGoogleProfile = async (user, googleData) => {
-  if (!user || !googleData) return;
+export const mergeGoogleProfile = async (user) => {
+  if (!user) return null;
 
   try {
     // Get the current user profile
     const userDocRef = doc(db, 'users', user.uid);
-    const userProfile = await getDoc(userDocRef);
-
-    // Merge the profile data
-    const updates = {
-      displayName: user.displayName || googleData.displayName,
-      photoURL: user.photoURL || googleData.photoURL,
-      email: user.email || googleData.email,
+    const userDoc = await getDoc(userDocRef);
+    
+    // Create or update user data
+    const userData = {
+      email: user.email,
+      displayName: user.displayName,
+      photoURL: user.photoURL,
+      firstName: user.displayName?.split(' ')[0] || 'User',
+      lastName: user.displayName?.split(' ').slice(1).join(' ') || '',
       lastSignInTime: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
 
+    // If user document doesn't exist, add createdAt
+    if (!userDoc.exists()) {
+      userData.createdAt = new Date().toISOString();
+    }
+
     // Update the user document
-    await setDoc(userDocRef, updates, { merge: true });
-    return updates;
+    await setDoc(userDocRef, userData, { merge: true });
+    return userData;
   } catch (error) {
     console.error('Error updating profile:', error);
     throw error;

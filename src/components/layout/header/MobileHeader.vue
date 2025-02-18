@@ -75,8 +75,13 @@ const handleLogout = async () => {
                 <div class="p-6 pt-0 flex items-center justify-between">
                   <div class="flex items-center gap-3">
                     <Avatar>
-                      <AvatarImage v-if="authStore.user?.photoURL" :src="authStore.user.photoURL"
-                        :alt="authStore.userFullName" />
+                      <AvatarImage 
+                        v-if="authStore.user?.photoURL" 
+                        :src="authStore.user.photoURL"
+                        :alt="authStore.userFullName"
+                        @error="console.error('Avatar image failed to load:', authStore.user.photoURL)"
+                        referrerPolicy="no-referrer"
+                      />
                       <AvatarFallback>
                         {{ authStore.userInitials }}
                       </AvatarFallback>

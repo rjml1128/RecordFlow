@@ -3,6 +3,7 @@ import { createPinia } from 'pinia'
 import { auth } from './services/core/firebase'
 import { useAuthStore } from './stores/authStore'
 import { createServices } from './services'
+import { mergeGoogleProfile } from './services/core/firebase'
 
 import './assets/main.css'
 
@@ -25,10 +26,17 @@ app.mount('#app')
 auth.authStateReady()
   .then(() => {
     return Promise.all([
-      // Wait for auth to initialize
+      // Wait for auth to initialize and set up persistent listener
       new Promise(resolve => {
-        const unsubscribe = auth.onAuthStateChanged(() => {
-          unsubscribe()
+        auth.onAuthStateChanged(async (user) => {
+          const authStore = useAuthStore()
+          if (user) {
+            // Merge and update user profile data
+            const userData = await mergeGoogleProfile(user)
+            authStore.setUser(userData)
+          } else {
+            authStore.setUser(null)
+          }
           resolve()
         })
       }),

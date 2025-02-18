@@ -136,13 +136,15 @@ export function useAuth() {
       const docRef = doc(db, 'users', uid)
       await setDoc(docRef, {
         ...userData,
+        photoURL: userData.photoURL || null,
+        displayName: userData.displayName || `${userData.firstName} ${userData.lastName}`,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       })
 
       // Fetch and store the profile in the auth store
       const profile = await getUserProfile(uid)
-      authStore.setUserProfile(profile)
+      authStore.setUser(profile)
     } catch (e) {
       console.error('Error creating user profile:', e)
       throw new Error('Failed to create user profile')
@@ -200,12 +202,27 @@ export function useAuth() {
     error.value = null
 
     try {
-      const tokens = await authStore.loginWithGoogle()
-      await storeLocalCredentials(tokens)
-      setupAuthCheck()
-      await createUserDocument(auth.currentUser)
+      const result = await authStore.loginWithGoogle()
+      
+      // Create or update user document with Google profile data
+      await createUserDocument(result.user)
+      
+      // Get the user profile and merge with Google data
+      const userProfile = await getUserProfile(result.user.uid)
+      if (!userProfile) {
+        // Create new profile with Google data
+        await createUserProfile(result.user.uid, {
+          firstName: result.user.displayName?.split(' ')[0] || 'User',
+          lastName: result.user.displayName?.split(' ').slice(1).join(' ') || '',
+          email: result.user.email,
+          photoURL: result.user.photoURL,
+          displayName: result.user.displayName
+        })
+      }
+
+      return result
     } catch (err) {
-      error.value = err.message
+      error.value = handleAuthError(err)
       throw err
     } finally {
       loading.value = false
@@ -244,10 +261,14 @@ export function useAuth() {
     const userDoc = await getDoc(userRef)
     
     if (!userDoc.exists()) {
+      const { displayName, email, photoURL } = user
       await setDoc(userRef, {
-        email: user.email,
+        email,
+        displayName,
+        photoURL,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
+,
       })
     }
   }

@@ -6,15 +6,17 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Separator } from '@/components/ui/separator'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { useAuth } from '@/services/auth/useAuth'
+import { useAuthStore } from '@/stores/authStore'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
-const authStore = useAuth()
+const { logout, loading } = useAuth()
+const authStore = useAuthStore()
 const { toggleTheme, isDark } = useTheme()
 
 const handleLogout = async () => {
   try {
-    await authStore.logout()
+    await logout()
     router.push('/auth')
   } catch (error) {
     console.error('Logout failed:', error)
@@ -72,8 +74,13 @@ const handleLogout = async () => {
           <DropdownMenuTrigger :as-child="true">
             <Button variant="ghost" class="flex items-center gap-1 px-2">
               <Avatar class="h-8 w-8">
-                <AvatarImage v-if="authStore.user?.photoURL" :src="authStore.user.photoURL"
-                  :alt="authStore.userFullName" />
+                <AvatarImage 
+                  v-if="authStore.user?.photoURL" 
+                  :src="authStore.user.photoURL"
+                  :alt="authStore.userFullName"
+                  @error="console.error('Avatar image failed to load:', authStore.user.photoURL)"
+                  referrerPolicy="no-referrer"
+                />
                 <AvatarFallback>
                   {{ authStore.userInitials }}
                 </AvatarFallback>
@@ -88,9 +95,9 @@ const handleLogout = async () => {
             </div>
             <div class="p-1">
               <DropdownMenuItem class="flex items-center gap-2 cursor-pointer dropdown-menu-item" @click="handleLogout"
-                :disabled="authStore.loading">
+                :disabled="loading">
                 <LogOut class="h-4 w-4" />
-                <span>{{ authStore.loading ? 'Logging out...' : 'Log out' }}</span>
+                <span>{{ loading ? 'Logging out...' : 'Log out' }}</span>
               </DropdownMenuItem>
             </div>
           </DropdownMenuContent>
