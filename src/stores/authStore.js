@@ -1,104 +1,52 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
-import { auth } from '@/services/core/firebase'
-import { useFirestore } from '@/services/database/useFirestoreService'
 
-export const useAuthStore = defineStore('auth', () => {
-  // State
-  const user = ref(null)
-  const userProfile = ref(null)
-  const initialized = ref(false)
+export const useAuthStore = defineStore('auth', {
+  state: () => ({
+    user: null,
+    loading: false,
+    error: null,
+    authWarning: null,
+    initialized: false
+  }),
 
-  // Getters
-  const isAuthenticated = computed(() => user.value !== null)
-  const userFullName = computed(() => {
-    if (!userProfile.value) return ''
-    return `${userProfile.value.firstName} ${userProfile.value.lastName}`.trim()
-  })
-  const userInitials = computed(() => {
-    if (!userProfile.value) return ''
-    return `${userProfile.value.firstName.charAt(0)}${userProfile.value.lastName.charAt(0)}`.toUpperCase()
-  })
+  getters: {
+    userFullName: (state) => {
+      if (!state.user) return ''
+      return `${state.user.firstName} ${state.user.lastName}`
+    },
+    userInitials: (state) => {
+      if (!state.user) return ''
+      return `${state.user.firstName[0]}${state.user.lastName[0]}`
+    },
+    isAuthenticated: (state) => !!state.user
+  },
 
-  // Actions
-  function setUser(userData) {
-    if (userData) {
-      user.value = {
-        uid: userData.uid,
-        email: userData.email,
-        emailVerified: userData.emailVerified,
-        photoURL: userData.photoURL,
-        displayName: userData.displayName,
-      }
-    } else {
-      user.value = null
-    }
-  }
+  actions: {
+    setInitialized(value) {
+      this.initialized = value
+    },
 
-  function setUserProfile(profile) {
-    userProfile.value = profile
-  }
+    setAuthWarning(message) {
+      this.authWarning = message
+    },
 
-  function clearState() {
-    user.value = null
-    userProfile.value = null
-  }
+    setUser(user) {
+      this.user = user
+    },
 
-  // Initialize auth state listener
-  let unsubscribe = null
-  function initialize() {
-    if (unsubscribe) return
-
-    const { getUserProfile } = useFirestore()
-    
-    unsubscribe = auth.onAuthStateChanged(async (userData) => {
+    async refreshToken(refreshToken) {
       try {
-        initialized.value = true
-        
-        if (userData) {
-          setUser(userData)
-          try {
-            const profile = await getUserProfile(userData.uid)
-            setUserProfile(profile)
-          } catch (error) {
-            console.error('Error fetching user profile:', error)
-          }
-        } else {
-          clearState()
-        }
+        // Implement your token refresh logic here
+        // This should call your authentication provider's refresh endpoint
+        const response = await fetch('/api/auth/refresh', {
+          method: 'POST',
+          body: JSON.stringify({ refreshToken })
+        })
+        const data = await response.json()
+        return data.tokens
       } catch (error) {
-        console.error('Auth state change error:', error)
+        throw new Error('Failed to refresh token')
       }
-    })
-  }
-
-  // Clean up listener
-  function cleanup() {
-    if (unsubscribe) {
-      unsubscribe()
-      unsubscribe = null
     }
-  }
-
-  // Initialize on store creation
-  initialize()
-
-  return {
-    // State
-    user,
-    userProfile,
-    initialized,
-    
-    // Getters
-    isAuthenticated,
-    userFullName,
-    userInitials,
-    
-    // Actions
-    setUser,
-    setUserProfile,
-    clearState,
-    initialize,
-    cleanup,
   }
 })

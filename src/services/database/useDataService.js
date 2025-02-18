@@ -1,5 +1,5 @@
 import { db as firebaseDb, rtdb, auth } from '../core/firebase';
-import { db as localDb, dbOperations } from './db';
+import { localDb, dbOperations } from './localDb';
 import { collection, addDoc, updateDoc, deleteDoc, doc, getDocs, onSnapshot, getDoc, setDoc } from 'firebase/firestore';
 import { ref, set, get, child, update } from 'firebase/database';
 
@@ -22,12 +22,10 @@ class DataService {
     if (!userId || !auth.currentUser) return false;
     
     try {
-      // Try to read the user document first
-      const userDocRef = doc(firebaseDb, `users/${userId}`);
-      const userDoc = await getDoc(userDocRef);
-      
-      // If we can read the user doc, we likely have proper permissions
-      return userDoc.exists();
+      // Check the user's grade levels collection since that's the structure in your rules
+      const userGradeLevelsRef = collection(firebaseDb, `users/${userId}/gradeLevels`);
+      const snapshot = await getDocs(userGradeLevelsRef);
+      return true; // If we can read the collection, we have permissions
     } catch (error) {
       console.error('Permission check failed:', error);
       return false;
@@ -90,39 +88,31 @@ class DataService {
   async startSync(userId) {
     if (!userId || !auth.currentUser || this.unsubscribe) return;
 
-    // Check if we can connect to Firebase with the user's document
-    const canConnect = await this.checkConnection(userId);
-    if (!canConnect) {
-      console.error('Cannot establish connection to Firebase');
-      return;
-    }
-
     try {
-      // Double check auth state
       if (userId !== auth.currentUser.uid) {
         console.error('User ID mismatch');
         return;
       }
 
-      // Initialize user document structure
+      // Initialize user document structure with grade levels
       const userDocRef = doc(firebaseDb, `users/${userId}`);
-      const recordsCollectionRef = collection(firebaseDb, `users/${userId}/records`);
       
       // Create initial structure if it doesn't exist
       await setDoc(userDocRef, {
         uid: userId,
+        email: auth.currentUser.email,
         updatedAt: new Date().toISOString(),
         createdAt: new Date().toISOString()
       }, { merge: true });
 
       console.log('User document structure initialized');
 
-      // Firestore sync with correct path structure
-      const recordsRef = recordsCollectionRef;
+      // Update the sync to work with the grade levels structure
+      const gradeLevelsRef = collection(firebaseDb, `users/${userId}/gradeLevels`);
       
       console.log('Starting Firestore sync');
       
-      this.unsubscribe = onSnapshot(recordsRef, {
+      this.unsubscribe = onSnapshot(gradeLevelsRef, {
         next: (snapshot) => {
           if (this.syncInProgress) return;
           
@@ -131,28 +121,25 @@ class DataService {
             
             if (change.type === 'added' || change.type === 'modified') {
               await localDb.records.put(data);
-              // Sync to RTDB
-              await set(ref(rtdb, `users/${userId}/records/${data.id}`), data);
+              // Sync to RTDB with the new structure
+              await set(ref(rtdb, `users/${userId}/gradeLevels/${data.id}`), data);
             } else if (change.type === 'removed') {
               await localDb.records.delete(data.id);
               // Remove from RTDB
-              await set(ref(rtdb, `users/${userId}/records/${data.id}`), null);
+              await set(ref(rtdb, `users/${userId}/gradeLevels/${data.id}`), null);
             }
           });
 
-          // Reset retry attempts on successful sync
           this.retryAttempts = 0;
         },
         error: async (error) => {
           console.error('Firestore sync error:', error);
           
-          // Clean up current listener
           if (this.unsubscribe) {
             this.unsubscribe();
             this.unsubscribe = null;
           }
 
-          // Retry logic for temporary errors
           if (this.retryAttempts < this.maxRetries) {
             this.retryAttempts++;
             console.log(`Retrying sync (attempt ${this.retryAttempts})...`);
@@ -167,10 +154,8 @@ class DataService {
     } catch (error) {
       console.error('Error starting sync:', error);
       
-      // Retry logic for startup errors
       if (this.retryAttempts < this.maxRetries) {
         this.retryAttempts++;
-        console.log(`Retrying sync (attempt ${this.retryAttempts})...`);
         await new Promise(resolve => setTimeout(resolve, this.retryDelay));
         await this.startSync(userId);
       }
@@ -192,29 +177,28 @@ class DataService {
   // Add record with offline support and dual database sync
   async addRecord(data) {
     try {
-      // Add to local DB first
       const localId = await dbOperations.addRecord(data);
       
       if (navigator.onLine && auth.currentUser?.uid) {
         this.syncInProgress = true;
-        const docRef = await addDoc(
-          collection(firebaseDb, `users/${auth.currentUser.uid}/records`),
-          {
-            ...data,
-            userId: auth.currentUser.uid,
-            createdAt: new Date()
-          }
-        );
+        const { gradeLevelId, subjectId, classId } = data;
+        
+        // Use the nested path structure
+        const path = `users/${auth.currentUser.uid}/gradeLevels/${gradeLevelId}/subjects/${subjectId}/classes/${classId}/records`;
+        const docRef = await addDoc(collection(firebaseDb, path), {
+          ...data,
+          userId: auth.currentUser.uid,
+          createdAt: new Date()
+        });
 
-        // Add to Realtime Database
-        await set(ref(rtdb, `users/${auth.currentUser.uid}/records/${docRef.id}`), {
+        // Update RTDB with the same structure
+        await set(ref(rtdb, `${path}/${docRef.id}`), {
           ...data,
           id: docRef.id,
           userId: auth.currentUser.uid,
           createdAt: new Date().toISOString()
         });
 
-        // Update local record with Firebase ID
         await localDb.records.update(localId, { firebaseId: docRef.id });
         this.syncInProgress = false;
       }

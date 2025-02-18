@@ -11,7 +11,7 @@ import {
   where,
   orderBy 
 } from 'firebase/firestore'
-import { db } from '../core/firebase'
+import { db as firebaseDb, auth } from '../core/firebase'
 import { dataService } from './useDataService'
 import { useAuthStore } from '@/stores/authStore'
 
@@ -21,28 +21,35 @@ export function useFirestore() {
   const authStore = useAuthStore()
 
   const getUserDocRef = (userId = authStore.user?.uid) => {
-    if (!userId) throw new Error('User ID is required')
-    return doc(db, 'users', userId)
+    if (!userId) {
+      console.log('Auth Debug:', {
+        currentUser: auth.currentUser,
+        storeUser: authStore.user,
+        uid: authStore.user?.uid
+      })
+      throw new Error('User ID is required')
+    }
+    return doc(firebaseDb, 'users', userId)
   }
 
   const getGradeLevelDocRef = (gradeLevelId, userId = authStore.user?.uid) => {
     if (!userId) throw new Error('User ID is required')
-    return doc(db, 'users', userId, 'gradeLevels', gradeLevelId)
+    return doc(firebaseDb, 'users', userId, 'gradeLevels', gradeLevelId)
   }
 
   const getSubjectDocRef = (gradeLevelId, subjectId, userId = authStore.user?.uid) => {
     if (!userId) throw new Error('User ID is required')
-    return doc(db, 'users', userId, 'gradeLevels', gradeLevelId, 'subjects', subjectId)
+    return doc(firebaseDb, 'users', userId, 'gradeLevels', gradeLevelId, 'subjects', subjectId)
   }
 
   const getClassDocRef = (gradeLevelId, subjectId, classId, userId = authStore.user?.uid) => {
     if (!userId) throw new Error('User ID is required')
-    return doc(db, 'users', userId, 'gradeLevels', gradeLevelId, 'subjects', subjectId, 'classes', classId)
+    return doc(firebaseDb, 'users', userId, 'gradeLevels', gradeLevelId, 'subjects', subjectId, 'classes', classId)
   }
 
   const getRecordDocRef = (gradeLevelId, subjectId, classId, recordId, userId = authStore.user?.uid) => {
     if (!userId) throw new Error('User ID is required')
-    return doc(db, 'users', userId, 'gradeLevels', gradeLevelId, 'subjects', subjectId, 'classes', classId, 'records', recordId)
+    return doc(firebaseDb, 'users', userId, 'gradeLevels', gradeLevelId, 'subjects', subjectId, 'classes', classId, 'records', recordId)
   }
 
   // User Profile Operations
@@ -92,7 +99,7 @@ export function useFirestore() {
     error.value = ''
     
     try {
-      const colRef = collection(db, 'users', userId, 'gradeLevels')
+      const colRef = collection(firebaseDb, 'users', userId, 'gradeLevels')
       const q = query(colRef, orderBy('createdAt', 'desc'))
       const querySnapshot = await getDocs(q)
       return querySnapshot.docs.map(doc => ({
@@ -114,7 +121,20 @@ export function useFirestore() {
     error.value = ''
     
     try {
-      const colRef = collection(db, 'users', userId, 'gradeLevels')
+      // First ensure user document exists
+      const userDocRef = getUserDocRef(userId)
+      const userDoc = await getDoc(userDocRef)
+      
+      if (!userDoc.exists()) {
+        await setDoc(userDocRef, {
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          email: auth.currentUser?.email
+        })
+      }
+
+      // Then create grade level
+      const colRef = collection(firebaseDb, 'users', userId, 'gradeLevels')
       const docRef = doc(colRef)
       await setDoc(docRef, {
         ...data,
@@ -123,6 +143,12 @@ export function useFirestore() {
       })
       return docRef.id
     } catch (e) {
+      console.error('Firestore Error:', {
+        error: e,
+        userId,
+        authState: !!auth.currentUser,
+        path: `users/${userId}/gradeLevels`
+      })
       error.value = e.message
       throw e
     } finally {
@@ -138,7 +164,7 @@ export function useFirestore() {
     error.value = ''
     
     try {
-      const colRef = collection(db, 'users', userId, 'gradeLevels', gradeLevelId, 'subjects')
+      const colRef = collection(firebaseDb, 'users', userId, 'gradeLevels', gradeLevelId, 'subjects')
       const q = query(colRef, orderBy('createdAt', 'desc'))
       const querySnapshot = await getDocs(q)
       return querySnapshot.docs.map(doc => ({
@@ -160,7 +186,7 @@ export function useFirestore() {
     error.value = ''
     
     try {
-      const colRef = collection(db, 'users', userId, 'gradeLevels', gradeLevelId, 'subjects')
+      const colRef = collection(firebaseDb, 'users', userId, 'gradeLevels', gradeLevelId, 'subjects')
       const docRef = doc(colRef)
       await setDoc(docRef, {
         ...data,
@@ -185,7 +211,7 @@ export function useFirestore() {
     
     try {
       const colRef = collection(
-        db, 
+        firebaseDb, 
         'users', 
         userId, 
         'gradeLevels', 

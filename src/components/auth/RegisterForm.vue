@@ -147,7 +147,7 @@ import { Input } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
 import IconGoogle from '@/components/icons/IconGoogle.vue'
-import { useAuth } from '@/composables/useAuth'
+import { useAuth } from '@/services/auth/useAuth'
 import { useAuthStore } from '@/stores/authStore'
 
 const router = useRouter()

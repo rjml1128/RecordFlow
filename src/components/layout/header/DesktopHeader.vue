@@ -5,18 +5,16 @@ import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Separator } from '@/components/ui/separator'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
-import { useAuthStore } from '@/stores/authStore'
-import { useAuth } from '@/services/auth/useAuth.js'
+import { useAuth } from '@/services/auth/useAuth'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
-const authStore = useAuthStore()
+const authStore = useAuth()
 const { toggleTheme, isDark } = useTheme()
-const { loading, logout } = useAuth()
 
 const handleLogout = async () => {
   try {
-    await logout()
+    await authStore.logout()
     router.push('/auth')
   } catch (error) {
     console.error('Logout failed:', error)
@@ -90,9 +88,9 @@ const handleLogout = async () => {
             </div>
             <div class="p-1">
               <DropdownMenuItem class="flex items-center gap-2 cursor-pointer dropdown-menu-item" @click="handleLogout"
-                :disabled="loading">
+                :disabled="authStore.loading">
                 <LogOut class="h-4 w-4" />
-                <span>{{ loading ? 'Logging out...' : 'Log out' }}</span>
+                <span>{{ authStore.loading ? 'Logging out...' : 'Log out' }}</span>
               </DropdownMenuItem>
             </div>
           </DropdownMenuContent>
