@@ -14,24 +14,70 @@ import {
   GraduationCap,
   MoreVertical,
   Pencil,
-  Trash2
+  Trash2,
+  CloudOff,
+  Cloud,
+  RefreshCw,
 } from 'lucide-vue-next'
 
 defineProps({
   gradeName: {
     type: String,
     default: 'First Year'
+  },
+  syncStatus: {
+    type: String,
+    default: 'pending',
+    validator: (value) => ['synced', 'pending', 'error'].includes(value)
   }
 })
 
 defineEmits(['edit', 'delete'])
+
+// Compute sync status details
+const getSyncStatusDetails = (status) => {
+  switch (status) {
+    case 'synced':
+      return {
+        icon: Cloud,
+        tooltip: 'Changes synced',
+        class: 'text-green-500'
+      }
+    case 'pending':
+      return {
+        icon: RefreshCw,
+        tooltip: 'Changes pending sync',
+        class: 'text-yellow-500 animate-spin'
+      }
+    case 'error':
+      return {
+        icon: CloudOff,
+        tooltip: 'Sync failed',
+        class: 'text-red-500'
+      }
+    default:
+      return {
+        icon: RefreshCw,
+        tooltip: 'Unknown sync status',
+        class: 'text-gray-500'
+      }
+  }
+}
 </script>
 
 <template>
   <Card class="w-[280px]">
     <CardHeader class="pb-3">
       <div class="flex items-center justify-between">
-        <CardTitle class="text-base font-semibold text-foreground">{{ gradeName }}</CardTitle>
+        <div class="flex items-center gap-2">
+          <CardTitle class="text-base font-semibold text-foreground">{{ gradeName }}</CardTitle>
+          <component 
+            :is="getSyncStatusDetails(syncStatus).icon" 
+            class="h-4 w-4"
+            :class="getSyncStatusDetails(syncStatus).class"
+            :title="getSyncStatusDetails(syncStatus).tooltip"
+          />
+        </div>
         <DropdownMenu>
           <DropdownMenuTrigger as-child>
             <Button variant="ghost" size="icon" class="h-8 w-8 -mr-2">

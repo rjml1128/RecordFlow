@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { Plus } from 'lucide-vue-next'
@@ -11,53 +11,98 @@ import GradeLevelDelete from '@/components/layout/records/grade-level/GradeLevel
 import GradeLevelDisplay from '@/components/layout/records/grade-level/GradeLevelDisplay.vue'
 import GradeLevelPlaceholder from '@/components/layout/records/grade-level/GradeLevelPlaceholder.vue'
 import { useGradeLevelValidation } from '@/services/validation/useGradeLevelValidation'
+import { dbOperations } from '@/services/database/localDb'
 
 const dialog = useDialogStore()
 const { getNormalizedName } = useGradeLevelValidation()
 
-// Track existing grade levels
+// Track grade levels from database
 const gradeLevels = ref([])
 const selectedGradeLevel = ref(null)
 const isUpdateDialogOpen = ref(false)
 const isDeleteDialogOpen = ref(false)
 
+// Load grade levels from database on component mount
+onMounted(async () => {
+  try {
+    const levels = await dbOperations.getAllGradeLevels()
+    gradeLevels.value = levels
+  } catch (error) {
+    console.error('Failed to load grade levels:', error)
+  }
+})
+
 const handleAdd = async (name) => {
   try {
-    // TODO: Save to database
-    console.log('Adding grade level:', name)
-    gradeLevels.value.push(name)
+    // Check if grade level already exists
+    const existing = await dbOperations.getGradeLevelByName(name)
+    if (existing) {
+      throw new Error('Grade level already exists')
+    }
+
+    // Add to database
+    const id = await dbOperations.addGradeLevel(name)
+    const newGradeLevel = await dbOperations.getGradeLevel(id)
+    gradeLevels.value.push(newGradeLevel)
   } catch (error) {
-    throw new Error('Failed to add grade level')
+    throw new Error('Failed to add grade level: ' + error.message)
   }
 }
 
-const handleUpdate = async (oldName, newName) => {
+const handleUpdate = async (oldData, newName) => {
   try {
-    console.log('Updating grade level:', oldName, 'to', newName)
-    const index = gradeLevels.value.findIndex(name => 
-      getNormalizedName(name) === getNormalizedName(oldName)
+    // Find the grade level in local state
+    const gradeLevel = gradeLevels.value.find(level => 
+      getNormalizedName(level.name) === getNormalizedName(oldData)
     )
+    
+    if (!gradeLevel) {
+      throw new Error('Grade level not found')
+    }
+
+    // Check if new name already exists (excluding current grade level)
+    const existing = await dbOperations.getGradeLevelByName(newName)
+    if (existing && existing.id !== gradeLevel.id) {
+      throw new Error('A grade level with this name already exists')
+    }
+
+    // Update in database
+    await dbOperations.updateGradeLevel(gradeLevel.id, newName)
+    
+    // Update in local state
+    const index = gradeLevels.value.findIndex(level => level.id === gradeLevel.id)
     if (index !== -1) {
-      gradeLevels.value[index] = newName
+      const updated = await dbOperations.getGradeLevel(gradeLevel.id)
+      gradeLevels.value[index] = updated
     }
   } catch (error) {
-    throw new Error('Failed to update grade level')
+    throw new Error('Failed to update grade level: ' + error.message)
   }
 }
 
 const handleDelete = async (name) => {
   try {
-    console.log('Deleting grade level:', name)
-    const index = gradeLevels.value.findIndex(n => 
-      getNormalizedName(n) === getNormalizedName(name)
+    // Find the grade level in local state
+    const gradeLevel = gradeLevels.value.find(level => 
+      getNormalizedName(level.name) === getNormalizedName(name)
     )
+    
+    if (!gradeLevel) {
+      throw new Error('Grade level not found')
+    }
+
+    // Delete from database
+    await dbOperations.deleteGradeLevel(gradeLevel.id)
+    
+    // Remove from local state
+    const index = gradeLevels.value.findIndex(level => level.id === gradeLevel.id)
     if (index !== -1) {
       gradeLevels.value.splice(index, 1)
       isDeleteDialogOpen.value = false
       selectedGradeLevel.value = null
     }
   } catch (error) {
-    throw new Error('Failed to delete grade level')
+    throw new Error('Failed to delete grade level: ' + error.message)
   }
 }
 
@@ -126,11 +171,12 @@ const closeDeleteDialog = () => {
         
         <!-- Grade Levels Grid -->
         <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          <div v-for="grade in gradeLevels" :key="grade" class="flex justify-center">
+          <div v-for="grade in gradeLevels" :key="grade.id" class="flex justify-center">
             <GradeLevelDisplay 
-              :gradeName="grade"
-              @edit="openUpdateDialog(grade)"
-              @delete="openDeleteDialog(grade)"
+              :gradeName="grade.name"
+              :syncStatus="grade.syncStatus"
+              @edit="openUpdateDialog(grade.name)"
+              @delete="openDeleteDialog(grade.name)"
             />
           </div>
           <!-- Placeholder Card -->
@@ -146,13 +192,13 @@ const closeDeleteDialog = () => {
       :open="dialog.isGradeLevelAddOpen"
       @update:open="handleOpenChange"
       @add="handleAdd"
-      :existingNames="gradeLevels"
+      :existingNames="gradeLevels.map(g => g.name)"
     />
 
     <GradeLevelUpdate 
       v-if="selectedGradeLevel"
       :initialName="selectedGradeLevel"
-      :existingNames="gradeLevels"
+      :existingNames="gradeLevels.map(g => g.name)"
       @update="newName => handleUpdate(selectedGradeLevel, newName)"
       :open="isUpdateDialogOpen"
       @update:open="closeUpdateDialog"

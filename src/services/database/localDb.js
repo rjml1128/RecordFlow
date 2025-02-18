@@ -8,6 +8,7 @@ export class RecordFlowDB extends Dexie {
     this.version(2).stores({  // Increment version number
       records: '++id, title, date, userId', // Primary key is id (autoincrementing), indexes on title, date, and userId
       settings: 'id, value', // Primary key is id, index on value
+      gradeLevels: '++id, name, createdAt, updatedAt, syncStatus', // As per project brief
       auth: 'id, tokens, expiry', // New auth table
       // Add more tables as needed
     });
@@ -62,5 +63,49 @@ export const dbOperations = {
 
   async clearAuth() {
     return await localDb.auth.delete(1);
+  },
+
+  // Grade Level operations
+  async addGradeLevel(name) {
+    return await localDb.gradeLevels.add({
+      name,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      syncStatus: 'pending'
+    });
+  },
+
+  async getGradeLevel(id) {
+    return await localDb.gradeLevels.get(id);
+  },
+
+  async getAllGradeLevels() {
+    return await localDb.gradeLevels.toArray();
+  },
+
+  async updateGradeLevel(id, name) {
+    return await localDb.gradeLevels.update(id, {
+      name,
+      updatedAt: new Date(),
+      syncStatus: 'pending'
+    });
+  },
+
+  async deleteGradeLevel(id) {
+    return await localDb.gradeLevels.delete(id);
+  },
+
+  async getGradeLevelByName(name) {
+    return await localDb.gradeLevels
+      .where('name')
+      .equals(name)
+      .first();
+  },
+
+  async updateGradeLevelSyncStatus(id, status) {
+    return await localDb.gradeLevels.update(id, {
+      syncStatus: status,
+      updatedAt: new Date()
+    });
   }
 };
