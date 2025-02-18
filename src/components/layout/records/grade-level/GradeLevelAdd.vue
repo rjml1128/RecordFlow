@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -8,56 +8,95 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { RotateCw } from 'lucide-vue-next'
+import { RotateCw, Plus } from 'lucide-vue-next'
 import GradeLevelToast from './GradeLevelToast.vue'
-import { useDialogStore } from '@/stores/dialogStore'
+import { useGradeLevelValidation } from '@/services/validation/useGradeLevelValidation'
 
-const dialog = useDialogStore()
+const props = defineProps({
+  open: {
+    type: Boolean,
+    required: true
+  },
+  existingNames: {
+    type: Array,
+    default: () => []
+  }
+})
+
+const emit = defineEmits(['add', 'update:open'])
 const toast = ref()
-const emit = defineEmits(['add'])
 
 const gradeName = ref('')
 const isSaving = ref(false)
 
+const { errors, validateName, setExistingNames, getNormalizedName, getPreferredFormat } = useGradeLevelValidation()
+
+const formatExamples = {
+  'grade-number': 'Grade 1, Grade 2, Grade 3',
+  'grade-word': 'Grade One, Grade Two, Grade Three',
+  'year-ordinal': '1st Year, 2nd Year, 3rd Year',
+  'year-word': 'First Year, Second Year, Third Year',
+  null: 'Grade 1, First Year, 1st Year, or Grade One'
+}
+
+const descriptionText = computed(() => {
+  if (!props.existingNames.length) {
+    return `Choose your preferred format. Your first entry will set the format for all entries.`
+  }
+  const format = getPreferredFormat()
+  return `Please use the format: ${formatExamples[format]}`
+})
+
+const placeholderText = computed(() => {
+  if (!props.existingNames.length) {
+    return "Example: Grade 1, Grade One or 1st Year, First Year."
+  }
+  return props.existingNames[0] + ' (same format)'
+})
+
+onMounted(() => {
+  setExistingNames(props.existingNames)
+})
+
 const handleSubmit = async (e) => {
   e.preventDefault()
   const name = gradeName.value.trim()
-  if (name) {
-    isSaving.value = true
-    try {
-      await emit('add', name)
-      toast.value.showAddSuccess(name)
-      gradeName.value = ''
-      dialog.closeGradeLevelAdd()
-    } catch (error) {
-      toast.value.showError('add', error.message)
-    } finally {
-      isSaving.value = false
-    }
+  
+  if (!validateName(name)) {
+    toast.value.showError('validation', errors.value.name)
+    return
+  }
+
+  const normalizedName = getNormalizedName(name)
+  isSaving.value = true
+  
+  try {
+    await emit('add', normalizedName)
+    toast.value.showAddSuccess(normalizedName)
+    gradeName.value = ''
+    emit('update:open', false)
+  } catch (error) {
+    toast.value.showError('add', error.message)
+  } finally {
+    isSaving.value = false
   }
 }
 </script>
 
 <template>
   <Dialog 
-    v-model:open="dialog.isGradeLevelAddOpen"
-    @update:open="dialog.closeGradeLevelAdd"
+    :open="open"
+    @update:open="emit('update:open', $event)"
   >
-    <DialogTrigger as-child>
-      <slot>
-        <Button variant="outline" class="bg-primary text-primary-foreground hover:bg-primary/90">Add Grade Level</Button>
-      </slot>
-    </DialogTrigger>
     <DialogContent class="sm:max-w-[425px]">
       <form @submit="handleSubmit">
         <DialogHeader>
           <DialogTitle class="text-lg font-semibold leading-none tracking-tight">Add New Grade Level</DialogTitle>
           <DialogDescription class="text-sm text-muted-foreground">
-            Please enter a unique grade level name. Duplicate names are not allowed.
+            {{ descriptionText }}
           </DialogDescription>
         </DialogHeader>
 
@@ -67,13 +106,17 @@ const handleSubmit = async (e) => {
             <Input
               id="grade-name"
               v-model="gradeName"
-              placeholder="Example: Grade 1, Freshman"
+              :placeholder="placeholderText"
               class="col-span-3"
+              :class="{ 'border-destructive': errors.name }"
               autofocus
               :disabled="isSaving"
             />
-            <p class="text-[0.8rem] text-muted-foreground">
-              This name will be displayed in the grade levels list.
+            <p v-if="errors.name" class="text-sm text-destructive">
+              {{ errors.name }}
+            </p>
+            <p v-else class="text-[0.8rem] text-muted-foreground">
+              Names will maintain consistent formatting across all grade levels.
             </p>
           </div>
         </div>
@@ -82,14 +125,14 @@ const handleSubmit = async (e) => {
           <Button 
             type="button" 
             variant="ghost" 
-            @click="dialog.closeGradeLevelAdd"
+            @click="emit('update:open', false)"
             :disabled="isSaving"
           >
             Cancel
           </Button>
           <Button 
             type="submit"
- class="bg-primary text-primary-foreground hover:bg-primary/90"
+            class="bg-primary text-primary-foreground hover:bg-primary/90"
             :disabled="isSaving"
           >
             <template v-if="isSaving">

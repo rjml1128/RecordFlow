@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { Button } from '@/components/ui/button'
 import {
   AlertDialog,
@@ -12,43 +12,55 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
-import { RotateCw } from 'lucide-vue-next'
+import { RotateCw, Trash2 } from 'lucide-vue-next'
 import GradeLevelToast from './GradeLevelToast.vue'
 
 const props = defineProps({
   gradeName: {
     type: String,
     required: true
+  },
+  open: {
+    type: Boolean,
+    required: true
   }
 })
 
 const toast = ref()
-const emit = defineEmits(['delete'])
+const emit = defineEmits(['delete', 'update:open'])
 
-const open = ref(false)
 const isDeleting = ref(false)
+
+// Watch external open prop
+watch(() => props.open, (newValue) => {
+  if (!newValue) {
+    isDeleting.value = false
+  }
+})
 
 const handleDelete = async () => {
   isDeleting.value = true
   try {
     await emit('delete')
     toast.value.showDeleteSuccess(props.gradeName)
-    open.value = false
+    emit('update:open', false)
   } catch (error) {
     toast.value.showError('delete', error.message)
   } finally {
     isDeleting.value = false
   }
 }
+
+const closeDialog = () => {
+  emit('update:open', false)
+}
 </script>
 
 <template>
-  <AlertDialog v-model:open="open">
-    <AlertDialogTrigger as-child>
-      <slot>
-        <Button variant="outline" class="text-destructive hover:bg-destructive/10">Delete Grade Level</Button>
-      </slot>
-    </AlertDialogTrigger>
+  <AlertDialog 
+    :open="open"
+    @update:open="closeDialog"
+  >
     <AlertDialogContent class="sm:max-w-[425px]">
       <AlertDialogHeader>
         <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
@@ -58,7 +70,10 @@ const handleDelete = async () => {
         </AlertDialogDescription>
       </AlertDialogHeader>
       <AlertDialogFooter>
-        <AlertDialogCancel :disabled="isDeleting">
+        <AlertDialogCancel 
+          :disabled="isDeleting"
+          @click="closeDialog"
+        >
           Cancel
         </AlertDialogCancel>
         <AlertDialogAction

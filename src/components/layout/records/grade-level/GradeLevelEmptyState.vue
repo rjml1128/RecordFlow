@@ -2,9 +2,8 @@
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { SwatchBook, Plus } from 'lucide-vue-next'
-import { useDialogStore } from '@/stores/dialogStore'
 
-const dialog = useDialogStore()
+const emit = defineEmits(['create'])
 </script>
 
 <template>
@@ -19,8 +18,11 @@ const dialog = useDialogStore()
 
       <Button 
         variant="outline" 
-        class="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground 
-          ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"        @click="dialog.openGradeLevelAdd"
+        class="bg-primary text-primary-foreground hover:bg-primary/90 sm:w-auto
+          ring-offset-background transition-colors focus-visible:outline-none 
+          focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2
+          disabled:pointer-events-none disabled:opacity-50"
+        @click="emit('create')"
       >
         <Plus class="mr-1 h-4 w-4" />
         Create Now
